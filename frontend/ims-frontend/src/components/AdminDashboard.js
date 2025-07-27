@@ -133,7 +133,7 @@ function AdminDashboardPage() {
   return (
     <div style={{ padding: '20px' }}>
       <h1>Super Admin Dashboard - Organizations</h1>
-      
+      <button onClick={() => { localStorage.clear(); window.location.href = '/admin-login'; }}>Logout</button>
       <input
         type="text"
         placeholder="Search by organization name"
