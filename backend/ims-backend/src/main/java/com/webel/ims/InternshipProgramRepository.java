@@ -5,4 +5,7 @@ import java.util.List;
 
 public interface InternshipProgramRepository extends JpaRepository<InternshipProgram, Integer> {
     List<InternshipProgram> findByIntOrgId(Integer intOrgId);
+    
+    // NEW: Find all programs with a specific status
+    List<InternshipProgram> findByProgStatus(String status);
 }

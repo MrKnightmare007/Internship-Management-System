@@ -34,11 +34,6 @@ public class SecurityConfig {
         return new JwtAuthenticationFilter();
     }
 
-    /**
-     * This bean tells Spring Security to completely ignore requests that match the provided patterns.
-     * This is the best way to handle static resources like uploaded files, as it bypasses the
-     * entire security filter chain, improving performance and avoiding CORS issues.
-     */
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers("/uploads/**");
@@ -51,6 +46,7 @@ public class SecurityConfig {
             
             .cors(cors -> cors.configurationSource(request -> {
                 var corsConfig = new CorsConfiguration();
+                corsConfig.addAllowedOrigin("http://localhost:3000"); // For public/applicant site
                 corsConfig.addAllowedOrigin("http://admin.localhost:3000");
                 corsConfig.addAllowedOrigin("http://organization.localhost:3000");
                 corsConfig.addAllowedMethod("*");
@@ -60,9 +56,12 @@ public class SecurityConfig {
             }))
             
             .authorizeHttpRequests(requests -> requests
+                // Allow all authentication endpoints, including new applicant registration/login
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/organizations").permitAll()
-                // The /uploads/** rule is now handled by webSecurityCustomizer, so it's removed from here.
+                
+                // Allow public viewing of organizations (for dropdowns) and active programs
+                .requestMatchers(HttpMethod.GET, "/api/organizations", "/api/programs/public-list").permitAll()
+                
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )

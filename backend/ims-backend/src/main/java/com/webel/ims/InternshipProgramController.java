@@ -30,6 +30,17 @@ public class InternshipProgramController {
     
     private final String UPLOAD_DIR = "./uploads/";
 
+    // --- NEW: Public endpoint to list active programs ---
+    @GetMapping("/public-list")
+    public ResponseEntity<List<InternshipProgramDto>> getPublicPrograms() {
+        List<InternshipProgram> programs = programRepository.findByProgStatus("ACTIVE");
+        List<InternshipProgramDto> dtos = programs.stream()
+                .map(InternshipProgramDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    // --- Organization Master Endpoints (No Changes) ---
     private OrganizationMaster getCurrentUserOrganization() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
@@ -44,7 +55,7 @@ public class InternshipProgramController {
     public ResponseEntity<?> getProgramsForMyOrganization() {
         OrganizationMaster org = getCurrentUserOrganization();
         if (org == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied or user not associated with an organization.");
         }
         List<InternshipProgram> programs = programRepository.findByIntOrgId(org.getOrgId());
         List<InternshipProgramDto> dtos = programs.stream().map(InternshipProgramDto::new).collect(Collectors.toList());
@@ -132,7 +143,6 @@ public class InternshipProgramController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProgram(@PathVariable Integer id) {
-        // ... (delete logic remains the same)
         OrganizationMaster org = getCurrentUserOrganization();
         if (org == null) return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
         Optional<InternshipProgram> programOpt = programRepository.findById(id);
