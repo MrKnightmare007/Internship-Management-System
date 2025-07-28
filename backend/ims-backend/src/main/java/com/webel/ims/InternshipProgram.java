@@ -1,3 +1,4 @@
+// backend/ims-backend/src/main/java/com/webel/ims/InternshipProgram.java
 package com.webel.ims;
 
 import jakarta.persistence.*;
@@ -31,6 +32,31 @@ public class InternshipProgram {
     @Column(name = "prog_end_date")
     private LocalDate progEndDate;
 
+    // --- NEW FIELD ---
+    @Column(name = "internship_amount")
+    private Double internshipAmount;
+
+
+    @Column(name = "program_application_start_date")
+    private LocalDate programApplicationStartDate;
+
+    @Column(name = "program_application_end_date")
+    private LocalDate programApplicationEndDate;
+
+    // e.g., OPEN, CLOSED, SUSPENDED
+    @Column(name = "program_entry")
+    private String programEntry;
+
+    // e.g., FREE, PAID_BY_ORGANIZATION, PAID_BY_APPLICANT
+    @Column(name = "program_type")
+    private String programType;
+
+    // e.g., ONLINE, OFFLINE, HYBRID
+    @Column(name = "program_mode")
+    private String programMode;
+
+    // --- NEW FIELDS END ---
+
     @Column(name = "prog_duration_weeks")
     private Integer progDurationWeeks;
 
@@ -40,7 +66,6 @@ public class InternshipProgram {
     @Column(name = "prog_status", nullable = false)
     private String progStatus;
     
-    // NEW: Field to store the path to an uploaded document
     @Column(name = "attachment_path")
     private String attachmentPath;
 
@@ -66,6 +91,8 @@ public class InternshipProgram {
     public void setIntProgId(Integer intProgId) { this.intProgId = intProgId; }
     public String getIntProgName() { return intProgName; }
     public void setIntProgName(String intProgName) { this.intProgName = intProgName; }
+    public Double getInternshipAmount() { return internshipAmount; }
+    public void setInternshipAmount(Double internshipAmount) { this.internshipAmount = internshipAmount; }
     public String getIntProgDescription() { return intProgDescription; }
     public void setIntProgDescription(String intProgDescription) { this.intProgDescription = intProgDescription; }
     public Integer getIntOrgId() { return intOrgId; }
@@ -88,4 +115,16 @@ public class InternshipProgram {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    // Getters and Setters for NEW fields
+    public LocalDate getProgramApplicationStartDate() { return programApplicationStartDate; }
+    public void setProgramApplicationStartDate(LocalDate programApplicationStartDate) { this.programApplicationStartDate = programApplicationStartDate; }
+    public LocalDate getProgramApplicationEndDate() { return programApplicationEndDate; }
+    public void setProgramApplicationEndDate(LocalDate programApplicationEndDate) { this.programApplicationEndDate = programApplicationEndDate; }
+    public String getProgramEntry() { return programEntry; }
+    public void setProgramEntry(String programEntry) { this.programEntry = programEntry; }
+    public String getProgramType() { return programType; }
+    public void setProgramType(String programType) { this.programType = programType; }
+    public String getProgramMode() { return programMode; }
+    public void setProgramMode(String programMode) { this.programMode = programMode; }
 }
