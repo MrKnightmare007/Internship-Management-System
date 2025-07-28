@@ -1,27 +1,32 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import AdminLogin from './components/AdminLogin';
-import AdminDashboardPage from './components/AdminDashboard';
+import AdminRoutes from './components/AdminRoutes';
+import PublicRoutes from './components/PublicRoutes';
+import OrganizationRoutes from './components/OrganizationRoutes'; // Import new routes
 
-function PrivateRoute({ children }) {
-  const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/admin-login" />;
-}
+const getSubdomain = () => {
+  const host = window.location.hostname;
+  const parts = host.split('.');
+  
+  if (parts.length >= 2) {
+    if (parts[0] === 'admin') return 'admin';
+    if (parts[0] === 'organization') return 'organization';
+  }
+  
+  return null;
+};
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/admin-dashboard" element={
-          <PrivateRoute>
-            <AdminDashboardPage />
-          </PrivateRoute>
-        } />
-        <Route path="*" element={<Navigate to="/admin-login" />} />
-      </Routes>
-    </Router>
-  );
+  const subdomain = getSubdomain();
+
+  if (subdomain === 'admin') {
+    return <AdminRoutes />;
+  }
+
+  if (subdomain === 'organization') {
+    return <OrganizationRoutes />;
+  }
+  
+  return <PublicRoutes />;
 }
 
 export default App;

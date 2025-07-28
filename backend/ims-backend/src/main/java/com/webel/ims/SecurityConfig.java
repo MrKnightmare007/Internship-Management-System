@@ -2,10 +2,12 @@ package com.webel.ims;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,7 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
-@EnableWebSecurity // **ADDED**: This is crucial for enabling Spring Web Security
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
@@ -29,39 +31,44 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        // Assuming JwtAuthenticationFilter is a custom filter you have defined elsewhere
-        // This filter should be designed to bypass the /api/auth/login endpoint,
-        // as no JWT token will be present in the header for that request.
         return new JwtAuthenticationFilter();
+    }
+
+    /**
+     * This bean tells Spring Security to completely ignore requests that match the provided patterns.
+     * This is the best way to handle static resources like uploaded files, as it bypasses the
+     * entire security filter chain, improving performance and avoiding CORS issues.
+     */
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/uploads/**");
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Disable CSRF protection as we are using stateless authentication (JWT)
             .csrf(csrf -> csrf.disable())
             
-            // Add the CORS configuration
             .cors(cors -> cors.configurationSource(request -> {
                 var corsConfig = new CorsConfiguration();
-                corsConfig.addAllowedOrigin("http://localhost:3000"); // Allow frontend origin
-                corsConfig.addAllowedMethod("*"); // Allow all HTTP methods
-                corsConfig.addAllowedHeader("*"); // Allow all headers
-                corsConfig.setAllowCredentials(true); // Allow credentials
+                corsConfig.addAllowedOrigin("http://admin.localhost:3000");
+                corsConfig.addAllowedOrigin("http://organization.localhost:3000");
+                corsConfig.addAllowedMethod("*");
+                corsConfig.addAllowedHeader("*");
+                corsConfig.setAllowCredentials(true);
                 return corsConfig;
             }))
             
-            // Define authorization rules for HTTP requests
             .authorizeHttpRequests(requests -> requests
-                .requestMatchers("/api/auth/login").permitAll() // Allow unauthenticated access to the login endpoint
-                .requestMatchers("/error").permitAll() // **ADDED**: Permit access to the error endpoint to see underlying exceptions
-                .anyRequest().authenticated() // All other requests must be authenticated
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/organizations").permitAll()
+                // The /uploads/** rule is now handled by webSecurityCustomizer, so it's removed from here.
+                .requestMatchers("/error").permitAll()
+                .anyRequest().authenticated()
             )
             
-            // Configure session management to be stateless
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             
-            // Add the custom JWT authentication filter before the standard username/password filter
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
             
         return http.build();
