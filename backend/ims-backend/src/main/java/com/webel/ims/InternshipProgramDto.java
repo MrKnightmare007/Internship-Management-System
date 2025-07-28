@@ -1,64 +1,33 @@
 package com.webel.ims;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "internship_program_master")
-public class InternshipProgram {
+public class InternshipProgramDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "int_prog_id")
     private Integer intProgId;
-
-    @Column(name = "int_prog_name", nullable = false)
     private String intProgName;
-
-    @Column(name = "int_prog_description", columnDefinition = "TEXT")
     private String intProgDescription;
-
-    @Column(name = "int_org_id", nullable = false)
     private Integer intOrgId;
-
-    @Column(name = "int_coordinator_user_id", nullable = false)
-    private Integer intCoordinatorUserId;
-
-    @Column(name = "prog_start_date")
     private LocalDate progStartDate;
-
-    @Column(name = "prog_end_date")
     private LocalDate progEndDate;
-
-    @Column(name = "prog_duration_weeks")
     private Integer progDurationWeeks;
-
-    @Column(name = "prog_max_applicants")
     private Integer progMaxApplicants;
-
-    @Column(name = "prog_status", nullable = false)
     private String progStatus;
-    
-    // NEW: Field to store the path to an uploaded document
-    @Column(name = "attachment_path")
-    private String attachmentPath;
+    private String attachmentPath; // NEW field
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    public InternshipProgramDto() {}
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    public InternshipProgramDto(InternshipProgram program) {
+        this.intProgId = program.getIntProgId();
+        this.intProgName = program.getIntProgName();
+        this.intProgDescription = program.getIntProgDescription();
+        this.intOrgId = program.getIntOrgId();
+        this.progStartDate = program.getProgStartDate();
+        this.progEndDate = program.getProgEndDate();
+        this.progDurationWeeks = program.getProgDurationWeeks();
+        this.progMaxApplicants = program.getProgMaxApplicants();
+        this.progStatus = program.getProgStatus();
+        this.attachmentPath = program.getAttachmentPath(); // NEW mapping
     }
 
     // --- Getters and Setters ---
@@ -70,8 +39,6 @@ public class InternshipProgram {
     public void setIntProgDescription(String intProgDescription) { this.intProgDescription = intProgDescription; }
     public Integer getIntOrgId() { return intOrgId; }
     public void setIntOrgId(Integer intOrgId) { this.intOrgId = intOrgId; }
-    public Integer getIntCoordinatorUserId() { return intCoordinatorUserId; }
-    public void setIntCoordinatorUserId(Integer intCoordinatorUserId) { this.intCoordinatorUserId = intCoordinatorUserId; }
     public LocalDate getProgStartDate() { return progStartDate; }
     public void setProgStartDate(LocalDate progStartDate) { this.progStartDate = progStartDate; }
     public LocalDate getProgEndDate() { return progEndDate; }
@@ -84,8 +51,4 @@ public class InternshipProgram {
     public void setProgStatus(String progStatus) { this.progStatus = progStatus; }
     public String getAttachmentPath() { return attachmentPath; }
     public void setAttachmentPath(String attachmentPath) { this.attachmentPath = attachmentPath; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
