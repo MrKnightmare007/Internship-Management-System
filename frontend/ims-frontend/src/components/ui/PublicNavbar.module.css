@@ -1,79 +1,134 @@
 .header {
     background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     position: sticky;
     top: 0;
     z-index: 1000;
+    height: 80px;
+  }
+  
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
     padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .brand img {
+    height: 45px;
+    display: block;
   }
   
   .nav {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    height: 80px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  
-  .brand {
-    font-size: 1.5em;
-    font-weight: 700;
-    color: #0056b3;
-    text-decoration: none;
-  }
-  
-  .navList {
-    list-style: none;
-    display: flex;
     gap: 32px;
-    margin: 0;
-    padding: 0;
   }
   
-  .navList a {
+  .navLink {
     text-decoration: none;
     color: #333;
-    font-weight: 500;
-    padding: 8px 0;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.3s;
-  }
-  
-  .navList a:hover,
-  .navList a.active {
-    color: #007bff;
-    border-bottom: 2px solid #007bff;
-  }
-  
-  .actions a {
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 6px;
     font-weight: 600;
+    padding: 8px 4px;
+    border-bottom: 3px solid transparent;
     transition: all 0.3s;
   }
   
-  .loginBtn {
-    color: #007bff;
-    margin-right: 8px;
+  .navLink:hover,
+  .navLink.active {
+    color: #0056b3;
+    border-bottom-color: #0056b3;
   }
   
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .actionBtn {
+    text-decoration: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+  }
+  
+  .loginBtn {
+    color: #0056b3;
+    border-color: #0056b3;
+  }
   .loginBtn:hover {
-    background-color: #f0f0f0;
+    background-color: #0056b3;
+    color: #fff;
   }
   
   .registerBtn {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .registerBtn:hover {
     background-color: #0056b3;
+    color: #fff;
+  }
+  .registerBtn:hover {
+    opacity: 0.85;
   }
   
-  @media (max-width: 768px) {
-    .navList {
-      display: none; /* Hide nav links on mobile, can be replaced with a hamburger menu */
+  /* Mobile Menu */
+  .menuToggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1001;
+  }
+  
+  .navActionsMobile {
+    display: none;
+  }
+  
+  @media (max-width: 992px) {
+    .nav {
+      position: fixed;
+      top: 80px; /* Below the header */
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 80px);
+      background-color: #fff;
+      flex-direction: column;
+      justify-content: center;
+      gap: 40px;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .navOpen {
+      transform: translateX(0);
+    }
+  
+    .navLink {
+      font-size: 1.5rem;
+    }
+  
+    .actions {
+      display: none; /* Hide desktop action buttons */
+    }
+    
+    .navActionsMobile {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .navActionsMobile .actionBtn {
+      width: 200px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+    
+    .menuToggle {
+      display: block;
     }
   }

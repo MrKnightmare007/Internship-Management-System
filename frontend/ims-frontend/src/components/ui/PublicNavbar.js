@@ -1,31 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './PublicNavbar.module.css';
 
 const PublicNavbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <header className={styles.header}>
-      <nav className={styles.nav}>
+      <div className={styles.container}>
         <NavLink to="/" className={styles.brand}>
-          WEBEL IMS
+          {/* Make sure this image is in public/assets/img/ */}
+          <img src="/assets/img/Webel_logo_WBEIDC.png" alt="Webel Logo" />
         </NavLink>
-        <ul className={styles.navList}>
-          <li>
-            <NavLink to="/" className={({ isActive }) => (isActive ? styles.active : '')}>
-              Home
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/internships" className={({ isActive }) => (isActive ? styles.active : '')}>
-              Internships
-            </NavLink>
-          </li>
-        </ul>
+
+        <nav className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`}>
+          <NavLink to="/" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
+            Home
+          </NavLink>
+          <NavLink to="/internships" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
+            Internships
+          </NavLink>
+          <div className={styles.navActionsMobile}>
+            <NavLink to="/login" className={`${styles.actionBtn} ${styles.loginBtn}`}>Login</NavLink>
+            <NavLink to="/register" className={`${styles.actionBtn} ${styles.registerBtn}`}>Register</NavLink>
+          </div>
+        </nav>
+
         <div className={styles.actions}>
-          <NavLink to="/login" className={styles.loginBtn}>Login</NavLink>
-          <NavLink to="/register" className={styles.registerBtn}>Register</NavLink>
+          <NavLink to="/login" className={`${styles.actionBtn} ${styles.loginBtn}`}>Login</NavLink>
+          <NavLink to="/register" className={`${styles.actionBtn} ${styles.registerBtn}`}>Register</NavLink>
         </div>
-      </nav>
+
+        <button className={styles.menuToggle} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <i className={isMenuOpen ? 'fas fa-times' : 'fas fa-bars'}></i>
+        </button>
+      </div>
     </header>
   );
 };

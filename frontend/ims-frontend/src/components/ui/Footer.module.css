@@ -1,18 +1,120 @@
-.footer {
-    background-color: #f8f9fa;
-    border-top: 1px solid #e0e0e0;
-    padding: 20px;
-    text-align: center;
-    color: #6c757d;
-    margin-top: auto; /* Pushes the footer to the bottom in a flex container */
+.footerWrap {
+    background-color: #1a2a46; /* Fallback color */
+    /* Make sure this image is in public/assets/img/ */
+    background-image: linear-gradient(rgba(26, 42, 70, 0.9), rgba(26, 42, 70, 0.9)), url('/assets/img/webel-bhavan-wbeidc.jpg');
+    background-size: cover;
+    background-position: center;
+    color: #adb5bd;
+  }
+  
+  .footerWidgets {
+    padding: 80px 0;
   }
   
   .container {
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
   }
   
-  .container p {
-    margin: 5px 0;
-    font-size: 0.9em;
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+  }
+  
+  .col {
+    position: relative;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .footerLogo {
+    max-width: 150px;
+  }
+  
+  .tagline {
+    margin-top: 1.5rem;
+    font-size: 1em;
+  }
+  
+  .socialLink {
+    margin-top: 20px;
+  }
+  
+  .socialLink a {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: inline-block;
+    transition: all 0.3s;
+  }
+  
+  .socialLink a:hover {
+    background-color: #007bff;
+  }
+  
+  .widTitle {
+    font-size: 1.25em;
+    color: #fff;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  
+  .singleWidget ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .singleWidget ul li {
+    margin-bottom: 12px;
+  }
+  
+  .singleWidget ul li a {
+    color: #adb5bd;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .singleWidget ul li a:hover {
+    color: #fff;
+  }
+  
+  .footerBottom {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 20px 0;
+    text-align: center;
+  }
+  
+  .footerBottom p {
+    margin: 0;
+    color: #fff;
+  }
+  
+  .footerBottom a {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  
+  /* Responsive Grid using Flexbox */
+  @media (min-width: 768px) {
+    .col { flex: 0 0 50%; max-width: 50%; }
+  }
+  
+  @media (min-width: 1200px) {
+    .container { max-width: 1140px; }
+    .col_xl_2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+    .col_xl_3 { flex: 0 0 25%; max-width: 25%; }
   }
