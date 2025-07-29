@@ -12,7 +12,7 @@ const LandingPage = () => {
           <p className={styles.heroSubtitle}>
             Explore exclusive internship opportunities in Data Science, Machine Learning, and more. Gain real-world experience and build your future with us.
           </p>
-          <Link to="/internships">
+          <Link to="/applicant-dashboard">
             <Button variant="primary">View Open Internships</Button>
           </Link>
         </div>

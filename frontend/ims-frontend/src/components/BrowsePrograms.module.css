@@ -1,0 +1,136 @@
+.pageTitle {
+    font-size: 2.2em;
+    margin-bottom: 24px;
+    color: #333;
+}
+
+.programGrid {
+    display: grid;
+    gap: 24px;
+}
+
+.programCard { transition: all 0.3s ease; }
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+.cardHeader h3 { margin: 0; font-size: 1.4em; }
+
+.statusBadge {
+    padding: 6px 12px;
+    border-radius: 16px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8em;
+}
+.open { background-color: #28a745; }
+.closed { background-color: #dc3545; }
+
+.department { font-weight: 600; color: #666; margin-bottom: 16px; }
+
+.detailsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+    color: #555;
+}
+.detailsGrid p { margin: 0; }
+
+.deadline { font-weight: 600; color: #0056b3; }
+
+.cardActions {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.errorText { color: #dc3545; }
+
+/* Application Form Styles */
+.applicationForm fieldset {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+.applicationForm legend {
+    font-weight: 600;
+    color: #0056b3;
+    padding: 0 8px;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.applicationForm input, .applicationForm textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.fullWidth {
+    grid-column: 1 / -1;
+}
+
+.inputGroup {
+    width: 100%;
+}
+
+.inputGroup label {
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.radioGroup {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+.radioGroup label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.academicRecord {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.uploadInstructions {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 16px;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+/* --- ADD THIS MEDIA QUERY FOR RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    .formGrid {
+        grid-template-columns: 1fr; /* Stack the 2-column grid */
+    }
+    .academicRecord {
+        grid-template-columns: 1fr; /* Stack the 5-column grid */
+    }
+}

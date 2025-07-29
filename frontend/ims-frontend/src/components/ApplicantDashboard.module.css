@@ -1,91 +1,55 @@
-.page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #f4f7f6;
-  }
-  
-  .mainContent {
-    flex-grow: 1;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 24px;
-    box-sizing: border-box;
-  }
-  
-  .mainContent section {
-    margin-bottom: 40px;
-  }
-  .mainContent h2 {
-    font-size: 1.8em;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 8px;
-    display: inline-block;
-  }
-  
-  .programGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 24px;
-  }
-  
-  .programCard {
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s; /* for hover on card itself */
-  }
-  .programCard:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  }
-  
-  .cardHeader {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-bottom: 12px;
-  }
-  .badge {
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.8em;
-      text-transform: uppercase;
-      color: #fff;
-  }
-  .online { background-color: #28a745; }
-  .offline { background-color: #17a2b8; }
-  .hybrid { background-color: #fd7e14; }
-  .paid_by_applicant { background-color: #6f42c1; }
-  .paid_by_organization { background-color: #007bff; }
-  .free { background-color: #6c757d; }
-  
-  
-  .programTitle {
-    font-size: 1.4em;
-    margin-bottom: 8px;
-  }
-  
-  .programDescription {
-    flex-grow: 1; /* Makes description take up available space */
-    color: #555;
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-  
-  .programDetails {
-    border-top: 1px solid #eee;
-    padding-top: 12px;
-    margin-bottom: 16px;
-    font-size: 0.9em;
-  }
-  .programDetails p {
-    margin: 4px 0;
-  }
-  
-  .applyButton {
-    width: 100%;
-  }
-  .errorText { color: #dc3545; }
+.pageTitle {
+  font-size: 2.2em;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.summaryCard {
+  text-align: center;
+}
+
+.summaryCard h4 {
+  margin: 0 0 8px 0;
+  color: #555;
+  font-size: 1.1em;
+}
+
+.summaryValue {
+  font-size: 3em;
+  font-weight: 700;
+  color: #007bff;
+  margin: 0;
+}
+
+.sectionTitle {
+  font-size: 1.8em;
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+.activityList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activityList li {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.activityList li:last-child {
+  border-bottom: none;
+}
+
+.activityDate {
+  color: #888;
+}

@@ -1,0 +1,47 @@
+.pageTitle {
+    font-size: 2.2em;
+    margin-bottom: 24px;
+    color: #333;
+}
+
+.profileContent {
+    max-width: 600px;
+}
+
+.inputGroup {
+    margin-bottom: 20px;
+}
+
+.inputGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+}
+
+.inputGroup input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+    background-color: #f8f9fa;
+}
+
+.inputGroup input:not(:disabled) {
+    background-color: #fff;
+}
+
+.actions {
+    margin-top: 32px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.successMessage {
+    color: #28a745;
+    margin-top: 16px;
+    text-align: right;
+}
