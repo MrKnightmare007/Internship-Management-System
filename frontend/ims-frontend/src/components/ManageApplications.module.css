@@ -1,0 +1,44 @@
+.pageTitle {
+    font-size: 2.2em;
+    color: #333;
+    margin-bottom: 24px;
+}
+
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.summaryCard { text-align: center; padding: 24px; }
+.summaryCard h4 { margin: 0 0 8px 0; color: #555; font-size: 1.1em; }
+.summaryCard .summaryValue { font-size: 3.5em; font-weight: 700; color: #3498db; margin: 0; }
+
+.tableCard { padding: 0; } /* Remove padding to allow table to span full width */
+
+.tableContainer { width: 100%; overflow-x: auto; }
+
+.appTable { width: 100%; border-collapse: collapse; }
+.appTable th, .appTable td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+.appTable th { background-color: #f8f9fa; font-weight: 600; }
+.appTable tbody tr:last-child td { border-bottom: none; }
+.appTable tbody tr:hover { background-color: #f1f1f1; }
+
+.status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    color: #fff;
+}
+.pending { background-color: #f0ad4e; }
+.accepted { background-color: #5cb85c; }
+.rejected { background-color: #d9534f; }
+
+.actionsCell { display: flex; gap: 8px; }

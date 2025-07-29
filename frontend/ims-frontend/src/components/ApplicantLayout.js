@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import styles from './ApplicantLayout.module.css';
 import Navbar from './ui/Navbar';
 import Footer from './ui/Footer';
 
-const ApplicantSidebar = () => (
-  <aside className={styles.sidebar}>
+const ApplicantSidebar = ({ isOpen }) => (
+  // Apply the 'sidebarOpen' class conditionally
+  <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
     <div className={styles.studentInfo}>
-      <h4>Navigation</h4>
+      <h4>Applicant Portal</h4>
     </div>
     <nav className={styles.nav}>
       <NavLink to="/applicant-dashboard" end className={({ isActive }) => isActive ? styles.active : ''}>
@@ -33,11 +34,20 @@ const ApplicantSidebar = () => (
 );
 
 const ApplicantLayout = () => {
+  // State to manage sidebar visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className={styles.pageContainer}>
-      <Navbar title="Student Portal" isApplicant={true} logoutPath="/login" />
+      <Navbar title="Student Portal" showProfileMenu={true} profilePath="/applicant-dashboard/profile" logoutPath="/login" onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+
       <div className={styles.layout}>
-        <ApplicantSidebar />
+        {/* Mobile overlay to close menu when clicking outside */}
+        <div 
+          className={`${styles.mobileOverlay} ${isSidebarOpen ? styles.overlayVisible : ''}`}
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+        <ApplicantSidebar isOpen={isSidebarOpen} />
         <main className={styles.mainContent}>
           <Outlet />
         </main>

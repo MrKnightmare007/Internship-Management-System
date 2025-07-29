@@ -1,0 +1,67 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .pageTitle { font-size: 2.2em; color: #333; margin: 0; }
+  .errorText { color: #dc3545; }
+  .noProgramsText { text-align: center; padding: 24px; color: #666; }
+  
+  /* Table Styles */
+  .tableContainer { width: 100%; overflow-x: auto; }
+  .programTable { width: 100%; border-collapse: collapse; }
+  .programTable th, .programTable td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+  .programTable th { background-color: #f8f9fa; font-weight: 600; }
+  .programTable tbody tr:last-child td { border-bottom: none; }
+  .programTable tbody tr:hover { background-color: #f1f1f1; }
+  .actionsCell { display: flex; gap: 8px; }
+  
+  /* Status Badge */
+  .status { padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 0.8em; text-transform: uppercase; color: #fff; }
+  .active { background-color: #28a745; }
+  .draft { background-color: #ffc107; color: #333; }
+  .closed { background-color: #6c757d; }
+  
+  /* Form Dialog Styles */
+  .formDialog {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6); display: flex;
+    justify-content: center; align-items: center; z-index: 1000;
+    padding: 20px; box-sizing: border-box;
+  }
+  .formDialogContent {
+    background: white; width: 100%; max-width: 900px;
+    max-height: 90vh; border-radius: 8px;
+    display: flex; flex-direction: column;
+    animation: slide-down 0.3s ease-out;
+  }
+  .formHeader {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 24px; border-bottom: 1px solid #eee;
+  }
+  .formHeader h2 { margin: 0; }
+  .closeButton { background: none; border: none; font-size: 2em; cursor: pointer; color: #aaa; }
+  
+  .programForm {
+      padding: 24px;
+      overflow-y: auto;
+  }
+  .formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .formGroup { margin-bottom: 16px; }
+  .programForm label { font-weight: 500; margin-bottom: 4px; display: block; }
+  .programForm input, .programForm select, .programForm textarea {
+    width: 100%; padding: 10px; border-radius: 4px;
+    border: 1px solid #ccc; box-sizing: border-box;
+  }
+  .programForm textarea { min-height: 100px; }
+  .formActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+  
+  @keyframes slide-down {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @media (max-width: 768px) {
+    .formGrid { grid-template-columns: 1fr; }
+  }

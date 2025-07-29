@@ -31,7 +31,7 @@ function ApplicantLogin() {
   return (
     <div className={styles.pageContainer}>
       <Card className={styles.authCard}>
-        <h1 className={styles.title}>Applicant Login</h1>
+        <h1 className={styles.title}>Login</h1>
         <form onSubmit={handleLogin}>
           <div className={styles.inputGroup}>
             <label htmlFor="username">Username</label>

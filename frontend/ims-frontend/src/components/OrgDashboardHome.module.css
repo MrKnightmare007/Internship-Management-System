@@ -1,0 +1,53 @@
+.pageTitle {
+    font-size: 2.2em;
+    color: #333;
+    margin-bottom: 24px;
+}
+
+.summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.summaryCard {
+    text-align: center;
+    padding: 24px;
+}
+
+.summaryTitle {
+    margin: 0 0 8px 0;
+    color: #555;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.summaryValue {
+    font-size: 3.5em;
+    font-weight: 700;
+    color: #3498db;
+    margin: 0;
+}
+
+.sectionTitle {
+    font-size: 1.8em;
+    margin-top: 48px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.activityList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activityItem {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+}
+
+.activityList .activityItem:last-child {
+    border-bottom: none;
+}

@@ -8,8 +8,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-  padding: 20px; /* Add padding for small screens */
+  /* Increase z-index to be higher than the sidebar's 1100 */
+  z-index: 2000;
+  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -19,11 +20,12 @@
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 900px; /* Make the modal wider */
-  max-height: 90vh; /* Set a max height */
-  display: flex; /* Use flexbox for layout */
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
   flex-direction: column;
-  z-index: 1001;
+  /* Increase z-index to be higher than the overlay */
+  z-index: 2001;
   animation: slide-down 0.3s ease-out;
 }
 
@@ -34,7 +36,7 @@
   border-bottom: 1px solid #ccc;
   padding-bottom: 16px;
   margin-bottom: 16px;
-  flex-shrink: 0; /* Prevent header from shrinking */
+  flex-shrink: 0;
 }
 
 .title {
@@ -58,8 +60,8 @@
 
 .content {
   overflow-y: auto; /* Allow content to scroll */
-  margin-bottom: 24px;
-  padding-right: 16px; /* Add space for scrollbar */
+  /* Remove margin-bottom to allow form to control its own spacing */
+  padding-right: 16px; 
   margin-right: -16px;
 }
 
@@ -69,7 +71,9 @@
   gap: 10px;
   padding-top: 16px;
   border-top: 1px solid #eee;
-  flex-shrink: 0; /* Prevent actions from shrinking */
+  flex-shrink: 0;
+  /* Add this line to hide it, as our form has its own actions */
+  display: none; 
 }
 
 @keyframes slide-down {

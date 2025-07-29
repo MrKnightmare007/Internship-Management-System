@@ -1,0 +1,38 @@
+.pageTitle {
+    font-size: 2.2em;
+    color: #333;
+    margin-bottom: 24px;
+}
+
+.reportsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.reportCard {
+    display: flex;
+    flex-direction: column;
+}
+
+.reportTitle {
+    margin: 0 0 16px 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+}
+
+.statList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+    flex-grow: 1; /* Pushes button to the bottom */
+}
+
+.statList li {
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.statList li strong {
+    color: #333;
+}

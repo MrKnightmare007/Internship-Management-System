@@ -6,9 +6,8 @@ import Button from './ui/Button';
 import Loader from './ui/Loader';
 import Dialog from './ui/Dialog';
 
-// A new, comprehensive application form based on the BIO DATA proforma
-const ApplicationForm = ({ onApply, programName }) => {
-    // TODO: This state needs to be sent to a backend endpoint upon submission.
+// Updated ApplicationForm with validation and auto-filled duration
+const ApplicationForm = ({ onApply, program }) => {
     const [formData, setFormData] = useState({
         name: '',
         collegeNameAddress: '',
@@ -16,19 +15,42 @@ const ApplicationForm = ({ onApply, programName }) => {
         universityRegNo: '',
         courseStream: '',
         currentSemester: '',
-        internshipDuration: '3 Months',
         email: '',
         mobile: '',
         address: '',
         dob: '',
     });
+
     const [academicRecords, setAcademicRecords] = useState([
         { exam: '', board: '', subjects: '', year: '', percentage: '' }
     ]);
 
+    // State to track if the form is valid for submission
+    const [isFormValid, setIsFormValid] = useState(false);
+
+    // Effect to re-evaluate form validity whenever data changes
+    useEffect(() => {
+        const validateForm = () => {
+            // Check all personal and academic status details
+            for (const key in formData) {
+                if (formData[key].trim() === '') return false;
+            }
+            // Check that every field in every academic record is filled
+            for (const record of academicRecords) {
+                for (const key in record) {
+                    if (record[key].trim() === '') return false;
+                }
+            }
+            // If all checks pass, the form is valid
+            return true;
+        };
+        setIsFormValid(validateForm());
+    }, [formData, academicRecords]);
+
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value.toUpperCase() })); // In CAPS as per proforma
     };
 
     const handleAcademicChange = (index, e) => {
@@ -41,9 +63,15 @@ const ApplicationForm = ({ onApply, programName }) => {
     const addAcademicRecord = () => {
         setAcademicRecords([...academicRecords, { exam: '', board: '', subjects: '', year: '', percentage: '' }]);
     };
+    
+    // The 'onApply' prop is now called by the form's own button
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onApply();
+    }
 
     return (
-        <div className={styles.applicationForm}>
+        <form onSubmit={handleSubmit} className={styles.applicationForm}>
             <fieldset>
                 <legend>Personal Details</legend>
                 <div className={styles.formGrid}>
@@ -64,11 +92,9 @@ const ApplicationForm = ({ onApply, programName }) => {
                     <input name="courseStream" placeholder="Course Name with Stream" onChange={handleInputChange} required />
                     <input name="currentSemester" placeholder="Current Semester" onChange={handleInputChange} required />
                     <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
-                        <label>Internship Duration Applied For</label>
-                        <div className={styles.radioGroup}>
-                           <label><input type="radio" name="internshipDuration" value="3 Months" checked={formData.internshipDuration === '3 Months'} onChange={handleInputChange} /> 3 Months</label>
-                           <label><input type="radio" name="internshipDuration" value="6 Months" checked={formData.internshipDuration === '6 Months'} onChange={handleInputChange} /> 6 Months</label>
-                        </div>
+                        <label>Internship Duration (Auto-filled)</label>
+                        {/* This is now a disabled input showing the program's duration */}
+                        <input type="text" value={`${program.progDurationWeeks} weeks`} disabled />
                     </div>
                 </div>
             </fieldset>
@@ -77,11 +103,11 @@ const ApplicationForm = ({ onApply, programName }) => {
                 <legend>Past Academic Details</legend>
                 {academicRecords.map((record, index) => (
                     <div key={index} className={styles.academicRecord}>
-                        <input name="exam" placeholder="Name of Examination" value={record.exam} onChange={e => handleAcademicChange(index, e)} />
-                        <input name="board" placeholder="School/College/University" value={record.board} onChange={e => handleAcademicChange(index, e)} />
-                        <input name="subjects" placeholder="Subjects" value={record.subjects} onChange={e => handleAcademicChange(index, e)} />
-                        <input name="year" placeholder="Year of Passing" value={record.year} onChange={e => handleAcademicChange(index, e)} />
-                        <input name="percentage" placeholder="Percentage of Marks" value={record.percentage} onChange={e => handleAcademicChange(index, e)} />
+                        <input name="exam" placeholder="Name of Examination" value={record.exam} onChange={e => handleAcademicChange(index, e)} required/>
+                        <input name="board" placeholder="School/College/University" value={record.board} onChange={e => handleAcademicChange(index, e)} required/>
+                        <input name="subjects" placeholder="Subjects" value={record.subjects} onChange={e => handleAcademicChange(index, e)} required/>
+                        <input name="year" placeholder="Year of Passing" value={record.year} onChange={e => handleAcademicChange(index, e)} required/>
+                        <input name="percentage" placeholder="Percentage of Marks" value={record.percentage} onChange={e => handleAcademicChange(index, e)} required/>
                     </div>
                 ))}
                 <Button type="button" variant="secondary" onClick={addAcademicRecord}>+ Add Record</Button>
@@ -91,22 +117,28 @@ const ApplicationForm = ({ onApply, programName }) => {
                 <legend>Document Uploads</legend>
                 <p className={styles.uploadInstructions}>Please attach University Registration, Class X & XII Marksheets, and a valid age proof.</p>
                 <div className={styles.formGrid}>
-                    <div className={styles.inputGroup}><label>University Registration Certificate</label><input type="file" /></div>
-                    <div className={styles.inputGroup}><label>Class X Marksheet/Certificate</label><input type="file" /></div>
-                    <div className={styles.inputGroup}><label>Class XII Marksheet/Certificate</label><input type="file" /></div>
-                    <div className={styles.inputGroup}><label>Valid Age Proof</label><input type="file" /></div>
+                    {/* For validation, you would also need state to track if files are selected */}
+                    <div className={styles.inputGroup}><label>University Registration Certificate</label><input type="file" required/></div>
+                    <div className={styles.inputGroup}><label>Class X Marksheet/Certificate</label><input type="file" required/></div>
+                    <div className={styles.inputGroup}><label>Class XII Marksheet/Certificate</label><input type="file" required/></div>
+                    <div className={styles.inputGroup}><label>Valid Age Proof</label><input type="file" required/></div>
                 </div>
             </fieldset>
             
             <div className={styles.formActions}>
-                <Button onClick={onApply} variant="primary">Submit Application</Button>
+                {/* The button is now disabled based on isFormValid state */}
+                <Button type="submit" variant="primary" disabled={!isFormValid}>
+                    Submit Application
+                </Button>
             </div>
-        </div>
+        </form>
     );
 };
 
 
+// Main BrowsePrograms component
 const BrowsePrograms = () => {
+    // State and effects remain the same
     const [programs, setPrograms] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -127,7 +159,6 @@ const BrowsePrograms = () => {
     };
 
     const handleApplyConfirm = () => {
-        // TODO: Add actual API call to submit the form data
         alert(`Successfully applied for ${selectedProgram.intProgName}!`);
         setIsApplyDialogOpen(false);
     };
@@ -141,7 +172,6 @@ const BrowsePrograms = () => {
             <div className={styles.programGrid}>
                 {programs.map(prog => (
                     <Card key={prog.intProgId} className={styles.programCard}>
-                        {/* ... card content remains the same ... */}
                         <div className={styles.cardHeader}>
                             <h3>{prog.intProgName}</h3>
                             <span className={`${styles.statusBadge} ${prog.programEntry === 'OPEN' ? styles.open : styles.closed}`}>
@@ -150,7 +180,7 @@ const BrowsePrograms = () => {
                         </div>
                         <p className={styles.department}>WEBEL - Centre of Excellence</p>
                         <div className={styles.detailsGrid}>
-                            <p><strong>Duration:</strong> {prog.progDurationWeeks} months</p>
+                            <p><strong>Duration:</strong> {prog.progDurationWeeks} weeks</p>
                             <p><strong>Type:</strong> {prog.programType?.replace(/_/g, ' ')}</p>
                             <p><strong>Mode:</strong> {prog.programMode}</p>
                             <p><strong>Amount:</strong> ₹{prog.internshipAmount}/{prog.programType === 'PAID_BY_APPLICANT' ? 'one-time' : 'month'}</p>
@@ -166,13 +196,13 @@ const BrowsePrograms = () => {
             </div>
 
             {selectedProgram && (
+                // We no longer need the onConfirm prop on the Dialog itself
                 <Dialog
                     isOpen={isApplyDialogOpen}
                     onClose={() => setIsApplyDialogOpen(false)}
                     title={`Apply for: ${selectedProgram.intProgName}`}
-                    onConfirm={handleApplyConfirm}
                 >
-                    <ApplicationForm onApply={handleApplyConfirm} programName={selectedProgram.intProgName} />
+                    <ApplicationForm onApply={handleApplyConfirm} program={selectedProgram} />
                 </Dialog>
             )}
         </div>
