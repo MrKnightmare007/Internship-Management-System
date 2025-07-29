@@ -75,14 +75,14 @@ function AdminLogin() {
         />
       </div>
       <Button type="submit" variant="primary" disabled={isLoading} className={styles.submitButton}>
-        {isLoading ? 'Sending Code...' : 'Get Verification Code'}
+        {isLoading ? 'Logging In...' : 'LOGIN'}
       </Button>
     </form>
   );
 
   const renderOtpForm = () => (
     <form onSubmit={handleVerifyOtp}>
-      <p className={styles.instructions}>A 6-digit code has been sent to the admin email. Please enter it below.</p>
+      <p className={styles.instructions}>A 6-digit code has been sent to the super admin email. Please enter it below.</p>
       <div className={styles.inputGroup}>
         <label htmlFor="otp">One-Time Password (OTP)</label>
         <input
@@ -105,7 +105,7 @@ function AdminLogin() {
   return (
     <div className={styles.pageContainer}>
       <Card className={styles.loginCard}>
-        <h1 className={styles.title}>Super Admin Portal</h1>
+        <h1 className={styles.title}>Super Admin Login</h1>
         {!showOtpForm ? renderLoginForm() : renderOtpForm()}
         {message && !error && <p className={styles.message}>{message}</p>}
         {error && <p className={styles.error}>{error}</p>}

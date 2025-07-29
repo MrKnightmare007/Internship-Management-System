@@ -7,7 +7,7 @@ import Footer from './ui/Footer';
 const AdminSidebar = () => (
   <aside className={styles.sidebar}>
     <div className={styles.adminInfo}>
-      <h4>Super Admin</h4>
+      <h4>Super Admin Portal</h4>
     </div>
     <nav className={styles.nav}>
       <NavLink to="/admin-dashboard" end className={({ isActive }) => isActive ? styles.active : ''}>

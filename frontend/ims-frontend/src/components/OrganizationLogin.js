@@ -99,7 +99,7 @@ function OrganizationLogin() {
         <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Enter password" />
       </div>
       <Button type="submit" variant="primary" disabled={isLoading || isFetchingOrgs} className={styles.submitButton}>
-        {isLoading ? 'Sending Code...' : 'Get Verification Code'}
+        {isLoading ? 'Logging In...' : 'LOGIN'}
       </Button>
     </form>
   );
@@ -121,7 +121,7 @@ function OrganizationLogin() {
   return (
     <div className={styles.pageContainer}>
       <Card className={styles.loginCard}>
-        <h1 className={styles.title}>Organization Portal</h1>
+        <h1 className={styles.title}>Organization Master Login</h1>
         {!showOtpForm ? renderLoginForm() : renderOtpForm()}
         {message && !error && <p className={styles.message}>{message}</p>}
         {error && <p className={styles.error}>{error}</p>}

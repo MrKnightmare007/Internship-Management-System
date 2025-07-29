@@ -7,7 +7,7 @@ import Footer from './ui/Footer';
 const OrganizationSidebar = () => (
   <aside className={styles.sidebar}>
     <div className={styles.coordinatorInfo}>
-      <h4>Organization Master</h4>
+      <h4>Organization Master Portal</h4>
     </div>
     <nav className={styles.nav}>
       {/* Ensure these spans with emojis exist in your file */}
