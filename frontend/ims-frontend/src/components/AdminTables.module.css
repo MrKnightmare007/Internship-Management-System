@@ -1,0 +1,11 @@
+.pageTitle { font-size: 2.2em; color: #333; margin-bottom: 24px; }
+.tableCard { padding: 0; }
+.tableContainer { width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+table th, table td { padding: 16px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+table th { background-color: #f8f9fa; font-weight: 600; }
+table tbody tr:last-child td { border-bottom: none; }
+table tbody tr:hover { background-color: #f1f1f1; }
+.status { padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 0.8em; text-transform: uppercase; color: #fff; }
+.active { background-color: #28a745; }
+.closed { background-color: #6c757d; }

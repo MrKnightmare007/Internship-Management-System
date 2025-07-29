@@ -65,15 +65,14 @@
   margin-right: -16px;
 }
 
+/* Find this rule in the file and ensure 'display: flex' is present and 'display: none' is removed */
 .actions {
-  display: flex;
+  display: flex; /* This should be flex, not none */
   justify-content: flex-end;
   gap: 10px;
   padding-top: 16px;
   border-top: 1px solid #eee;
   flex-shrink: 0;
-  /* Add this line to hide it, as our form has its own actions */
-  display: none; 
 }
 
 @keyframes slide-down {

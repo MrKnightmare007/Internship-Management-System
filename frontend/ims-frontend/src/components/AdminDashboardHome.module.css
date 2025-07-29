@@ -1,0 +1,8 @@
+.pageTitle { font-size: 2.2em; color: #333; margin-bottom: 24px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.cardTitle { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.statList, .activityList { list-style: none; padding: 0; margin: 16px 0 0 0; }
+.statList li { display: flex; justify-content: space-between; padding: 8px 0; }
+.statList li span { font-weight: 600; }
+.activityList li { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+.activityList li:last-child { border-bottom: none; }

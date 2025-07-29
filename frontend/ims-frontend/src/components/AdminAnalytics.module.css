@@ -1,0 +1,6 @@
+.pageTitle { font-size: 2.2em; color: #333; margin-bottom: 24px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.fullWidth { grid-column: 1 / -1; }
+.metrics { margin-top: 16px; }
+.metrics p { font-size: 1.2em; }
+.metrics span { font-weight: 600; }

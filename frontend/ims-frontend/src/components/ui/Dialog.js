@@ -3,16 +3,22 @@ import styles from './Dialog.module.css';
 import Button from './Button';
 
 /**
- * A reusable Dialog (Modal) component for confirmations or alerts.
+ * Updated Dialog component.
  * @param {object} props
- * @param {boolean} props.isOpen - Controls the visibility of the dialog.
- * @param {function} props.onClose - Function to call when the dialog should be closed.
- * @param {string} props.title - The title of the dialog.
- * @param {React.ReactNode} props.children - The main content/message of the dialog.
- * @param {function} props.onConfirm - Function to call when the confirm action is taken.
- * @returns {JSX.Element|null} The dialog component or null if not open.
+ * @param {boolean} [props.hideActions=false] - If true, hides the default Cancel/Confirm buttons.
+ * @param {string} [props.confirmText='Confirm'] - Text for the confirm button.
+ * @param {'primary' | 'danger'} [props.confirmVariant='primary'] - Style for the confirm button.
  */
-const Dialog = ({ isOpen, onClose, title, children, onConfirm }) => {
+const Dialog = ({ 
+    isOpen, 
+    onClose, 
+    title, 
+    children, 
+    onConfirm,
+    hideActions = false,
+    confirmText = 'Confirm',
+    confirmVariant = 'primary'
+}) => {
   if (!isOpen) {
     return null;
   }
@@ -29,14 +35,18 @@ const Dialog = ({ isOpen, onClose, title, children, onConfirm }) => {
         <div className={styles.content}>
           {children}
         </div>
-        <div className={styles.actions}>
-          <Button variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={onConfirm}>
-            Confirm
-          </Button>
-        </div>
+        
+        {/* Buttons are now rendered conditionally */}
+        {!hideActions && (
+            <div className={styles.actions}>
+                <Button variant="secondary" onClick={onClose}>
+                    Cancel
+                </Button>
+                <Button variant={confirmVariant} onClick={onConfirm}>
+                    {confirmText}
+                </Button>
+            </div>
+        )}
       </div>
     </div>
   );
