@@ -1,0 +1,79 @@
+.header {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 0 24px;
+  }
+  
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .brand {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #0056b3;
+    text-decoration: none;
+  }
+  
+  .navList {
+    list-style: none;
+    display: flex;
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navList a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    padding: 8px 0;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s;
+  }
+  
+  .navList a:hover,
+  .navList a.active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+  }
+  
+  .actions a {
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .loginBtn {
+    color: #007bff;
+    margin-right: 8px;
+  }
+  
+  .loginBtn:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .registerBtn {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .registerBtn:hover {
+    background-color: #0056b3;
+  }
+  
+  @media (max-width: 768px) {
+    .navList {
+      display: none; /* Hide nav links on mobile, can be replaced with a hamburger menu */
+    }
+  }

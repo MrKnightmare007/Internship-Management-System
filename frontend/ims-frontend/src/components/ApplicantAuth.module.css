@@ -1,0 +1,73 @@
+.pageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 160px); /* Full height minus navbar and footer */
+    background-color: #f4f7f6;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .authCard {
+    width: 100%;
+    max-width: 450px;
+    padding: 32px;
+  }
+  
+  .title {
+    text-align: center;
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 24px;
+  }
+  
+  .inputGroup {
+    margin-bottom: 20px;
+  }
+  
+  .inputGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+  }
+  
+  .inputGroup input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+  }
+  
+  .submitButton {
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .message {
+    color: green;
+    text-align: center;
+    margin-top: 16px;
+  }
+  
+  .error {
+    color: #dc3545;
+    text-align: center;
+    margin-top: 16px;
+  }
+  
+  .redirectLink {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .redirectLink a {
+    color: #007bff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .redirectLink a:hover {
+    text-decoration: underline;
+  }

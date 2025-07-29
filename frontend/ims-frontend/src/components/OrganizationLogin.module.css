@@ -1,0 +1,73 @@
+/* Using the same styles as AdminLogin for consistency */
+.pageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f7f6;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .loginCard {
+    width: 100%;
+    max-width: 480px; /* Slightly wider for the extra field */
+    padding: 32px;
+  }
+  
+  .title {
+    text-align: center;
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 24px;
+  }
+  
+  .instructions {
+    text-align: center;
+    color: #666;
+    margin-bottom: 24px;
+  }
+  
+  .inputGroup {
+    margin-bottom: 20px;
+  }
+  
+  .inputGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+  }
+  
+  .inputGroup input,
+  .inputGroup select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+    background-color: #fff; /* Ensure select has a white background */
+  }
+  
+  .otpInput {
+    text-align: center;
+    letter-spacing: 0.5em;
+  }
+  
+  .submitButton {
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .message {
+    color: green;
+    text-align: center;
+    margin-top: 16px;
+  }
+  
+  .error {
+    color: #dc3545;
+    text-align: center;
+    margin-top: 16px;
+  }

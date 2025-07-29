@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
+import styles from './AdminLogin.module.css';
+import Card from './ui/Card';
+import Button from './ui/Button';
 
 function AdminLogin() {
   const [username, setUsername] = useState('');
@@ -9,92 +12,104 @@ function AdminLogin() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // State to control which form is shown (login vs. otp)
   const [showOtpForm, setShowOtpForm] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = (e) => {
+    e.preventDefault();
     setError('');
     setMessage('');
     setIsLoading(true);
     api.post('/auth/login', { username, password })
       .then(response => {
         setIsLoading(false);
-        setMessage(response.data.message); // "Verification code sent..."
-        setShowOtpForm(true); // Switch to the OTP form
+        setMessage(response.data.message);
+        setShowOtpForm(true);
       })
       .catch(err => {
         setIsLoading(false);
-        console.error('Login error:', err.response);
         setError(err.response?.data || 'Invalid credentials or server error');
       });
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
     setError('');
     setMessage('');
     setIsLoading(true);
     api.post('/auth/verify-otp', { username, otp })
       .then(response => {
         setIsLoading(false);
-        // OTP is correct, save token and navigate
         localStorage.setItem('token', response.data.token);
         navigate('/admin-dashboard');
       })
       .catch(err => {
         setIsLoading(false);
-        console.error('OTP verification error:', err.response);
         setError(err.response?.data || 'Invalid OTP or server error');
       });
   };
 
-  return (
-    <div style={{ padding: '20px', maxWidth: '400px', margin: '50px auto', border: '1px solid #ccc', borderRadius: '8px', textAlign: 'center' }}>
-      <h1>Super Admin Login</h1>
-      
-      {!showOtpForm ? (
-        // --- Step 1: Username and Password Form ---
-        <div>
-          <p>Please enter your credentials to receive a verification code.</p>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{ display: 'block', margin: '10px auto', padding: '8px', width: '90%' }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ display: 'block', margin: '10px auto', padding: '8px', width: '90%' }}
-          />
-          <button onClick={handleLogin} disabled={isLoading} style={{ padding: '10px 20px' }}>
-            {isLoading ? 'Logging in...' : 'LOG IN'}
-          </button>
-        </div>
-      ) : (
-        // --- Step 2: OTP Verification Form ---
-        <div>
-          <p style={{ color: 'green' }}>{message}</p>
-          <p>A 6-digit code has been sent to the admin email. Please enter it below.</p>
-          <input
-            type="text"
-            placeholder="6-Digit Code"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            maxLength="6"
-            style={{ display: 'block', margin: '10px auto', padding: '8px', width: '90%', letterSpacing: '0.5em' }}
-          />
-          <button onClick={handleVerifyOtp} disabled={isLoading} style={{ padding: '10px 20px' }}>
-            {isLoading ? 'Verifying...' : 'Verify & Login'}
-          </button>
-        </div>
-      )}
+  const renderLoginForm = () => (
+    <form onSubmit={handleLogin}>
+      <p className={styles.instructions}>Please enter your credentials to receive a verification code.</p>
+      <div className={styles.inputGroup}>
+        <label htmlFor="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          placeholder="Enter username"
+        />
+      </div>
+      <div className={styles.inputGroup}>
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          placeholder="Enter password"
+        />
+      </div>
+      <Button type="submit" variant="primary" disabled={isLoading} className={styles.submitButton}>
+        {isLoading ? 'Sending Code...' : 'Get Verification Code'}
+      </Button>
+    </form>
+  );
 
-      {error && <p style={{ color: 'red', marginTop: '15px' }}>{error}</p>}
+  const renderOtpForm = () => (
+    <form onSubmit={handleVerifyOtp}>
+      <p className={styles.instructions}>A 6-digit code has been sent to the admin email. Please enter it below.</p>
+      <div className={styles.inputGroup}>
+        <label htmlFor="otp">One-Time Password (OTP)</label>
+        <input
+          id="otp"
+          type="text"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          required
+          placeholder="Enter 6-digit code"
+          maxLength="6"
+          className={styles.otpInput}
+        />
+      </div>
+      <Button type="submit" variant="primary" disabled={isLoading} className={styles.submitButton}>
+        {isLoading ? 'Verifying...' : 'Verify & Login'}
+      </Button>
+    </form>
+  );
+
+  return (
+    <div className={styles.pageContainer}>
+      <Card className={styles.loginCard}>
+        <h1 className={styles.title}>Super Admin Portal</h1>
+        {!showOtpForm ? renderLoginForm() : renderOtpForm()}
+        {message && !error && <p className={styles.message}>{message}</p>}
+        {error && <p className={styles.error}>{error}</p>}
+      </Card>
     </div>
   );
 }
