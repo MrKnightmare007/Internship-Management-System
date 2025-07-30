@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a new instance of axios
 const api = axios.create({
-  baseURL: '/api' // Your backend API base URL
+  baseURL: `${process.env.REACT_APP_API_URL}/api`
 });
 
 // Add a request interceptor to the instance
