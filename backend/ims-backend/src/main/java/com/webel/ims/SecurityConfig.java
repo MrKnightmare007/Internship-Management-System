@@ -46,9 +46,16 @@ public class SecurityConfig {
             
             .cors(cors -> cors.configurationSource(request -> {
                 var corsConfig = new CorsConfiguration();
-                corsConfig.addAllowedOrigin("http://localhost:3000"); // For public/applicant site
+                // Local development URLs
+                corsConfig.addAllowedOrigin("http://localhost:3000");
                 corsConfig.addAllowedOrigin("http://admin.localhost:3000");
                 corsConfig.addAllowedOrigin("http://organization.localhost:3000");
+                
+                // Add your Vercel Production URLs
+                corsConfig.addAllowedOrigin("https://dev-internship-management-system-pi.vercel.app"); // Your main site
+                corsConfig.addAllowedOrigin("https://admin-ims-webel.vercel.app"); // Your admin site (or whatever you named it)
+                corsConfig.addAllowedOrigin("https://org-ims-webel.vercel.app"); // Your org site (or whatever you named it)
+            
                 corsConfig.addAllowedMethod("*");
                 corsConfig.addAllowedHeader("*");
                 corsConfig.setAllowCredentials(true);
