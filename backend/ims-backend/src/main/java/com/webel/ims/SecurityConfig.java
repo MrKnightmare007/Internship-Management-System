@@ -52,11 +52,11 @@ public class SecurityConfig {
                     corsConfig.addAllowedOrigin("http://organization.localhost:3000");
 
                     // Add your Vercel Production URLs
-                    corsConfig.addAllowedOrigin("https://dev-internship-management-system-pi.vercel.app"); // Your main
+                    corsConfig.addAllowedOrigin("https://dev-internship-management-system.vercel.app"); // Your main
                                                                                                            // site
-                    corsConfig.addAllowedOrigin("https://admin-ims-webel.vercel.app"); // Your admin site (or whatever
+                    corsConfig.addAllowedOrigin("https://admin-dev-internship-management-system.vercel.app/"); // Your admin site (or whatever
                                                                                        // you named it)
-                    corsConfig.addAllowedOrigin("https://org-ims-webel.vercel.app"); // Your org site (or whatever you
+                    corsConfig.addAllowedOrigin("https://organization-dev-internship-management-system.vercel.app/"); // Your org site (or whatever you
                                                                                      // named it)
 
                     corsConfig.addAllowedMethod("*");
