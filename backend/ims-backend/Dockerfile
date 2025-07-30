@@ -8,6 +8,9 @@ WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
+# --- ADD THIS LINE TO FIX THE PERMISSION ERROR ---
+RUN chmod +x ./mvnw
+
 # Copy your application's source code
 COPY src ./src
 
