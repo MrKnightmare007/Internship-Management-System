@@ -17,12 +17,15 @@ public class AdminUserInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // --- DEFINE YOUR SUPER ADMIN CREDENTIALS HERE ---
-        String adminEmail = "admin@webel.com";
+        String adminEmail = "dassoumyadipta007@gmail.com";
         String adminUsername = "superadmin";
-        String adminPassword = "password123"; // Choose a strong password
+        String adminPassword = "superpass123"; // Use the password you want
 
-        // Check if the admin user already exists
-        if (userRepository.findByUserEmail(adminEmail).isEmpty()) {
+        // --- UPDATED CHECK ---
+        // Check if a user with this username OR email already exists.
+        if (userRepository.findByUsername(adminUsername).isPresent() || userRepository.findByUserEmail(adminEmail).isPresent()) {
+            System.out.println(">>> Super admin user already exists. Skipping creation. <<<");
+        } else {
             System.out.println(">>> CREATING SUPER ADMIN USER <<<");
 
             User adminUser = new User();
@@ -35,8 +38,6 @@ public class AdminUserInitializer implements CommandLineRunner {
             userRepository.save(adminUser);
 
             System.out.println(">>> SUPER ADMIN CREATED SUCCESSFULLY <<<");
-        } else {
-            System.out.println(">>> Super admin user already exists. Skipping creation. <<<");
         }
     }
 }
