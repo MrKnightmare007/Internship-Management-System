@@ -54,9 +54,9 @@ public class SecurityConfig {
                     // Add your Vercel Production URLs
                     corsConfig.addAllowedOrigin("https://dev-internship-management-system.vercel.app"); // Your main
                                                                                                            // site
-                    corsConfig.addAllowedOrigin("https://admin-dev-internship-management-system.vercel.app/"); // Your admin site (or whatever
+                    corsConfig.addAllowedOrigin("https://admin-dev-internship-management-system.vercel.app"); // Your admin site (or whatever
                                                                                        // you named it)
-                    corsConfig.addAllowedOrigin("https://organization-dev-internship-management-system.vercel.app/"); // Your org site (or whatever you
+                    corsConfig.addAllowedOrigin("https://organization-dev-internship-management.vercel.app"); // Your org site (or whatever you
                                                                                      // named it)
 
                     corsConfig.addAllowedMethod("*");
