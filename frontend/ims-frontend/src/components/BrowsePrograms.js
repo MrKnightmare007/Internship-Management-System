@@ -138,7 +138,6 @@ const ApplicationForm = ({ onApply, program }) => {
 
 // Main BrowsePrograms component
 const BrowsePrograms = () => {
-    // State and effects remain the same
     const [programs, setPrograms] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -179,12 +178,29 @@ const BrowsePrograms = () => {
                             </span>
                         </div>
                         <p className={styles.department}>WEBEL - Centre of Excellence</p>
+                        
+                        {/* --- ADDED THIS SECTION --- */}
+                        <p className={styles.description}>{prog.intProgDescription}</p>
+                        
                         <div className={styles.detailsGrid}>
                             <p><strong>Duration:</strong> {prog.progDurationWeeks} weeks</p>
                             <p><strong>Type:</strong> {prog.programType?.replace(/_/g, ' ')}</p>
                             <p><strong>Mode:</strong> {prog.programMode}</p>
                             <p><strong>Amount:</strong> ₹{prog.internshipAmount}/{prog.programType === 'PAID_BY_APPLICANT' ? 'one-time' : 'month'}</p>
                         </div>
+
+                        {/* --- ADDED THIS SECTION --- */}
+                        {prog.attachmentPath && (
+                            <a 
+                                href={`http://localhost:8080/uploads/${prog.attachmentPath.split(/[\\/]/).pop()}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className={styles.attachmentLink}
+                            >
+                                📄 View Program Details
+                            </a>
+                        )}
+
                         <p className={styles.deadline}>
                             Application Deadline: {new Date(prog.programApplicationEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
@@ -196,11 +212,11 @@ const BrowsePrograms = () => {
             </div>
 
             {selectedProgram && (
-                // We no longer need the onConfirm prop on the Dialog itself
                 <Dialog
                     isOpen={isApplyDialogOpen}
                     onClose={() => setIsApplyDialogOpen(false)}
                     title={`Apply for: ${selectedProgram.intProgName}`}
+                    hideActions={true}
                 >
                     <ApplicationForm onApply={handleApplyConfirm} program={selectedProgram} />
                 </Dialog>
