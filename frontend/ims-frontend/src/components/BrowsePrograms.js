@@ -6,7 +6,7 @@ import Button from './ui/Button';
 import Loader from './ui/Loader';
 import Dialog from './ui/Dialog';
 
-// Updated ApplicationForm with validation and auto-filled duration
+// Sub-component for the detailed application form
 const ApplicationForm = ({ onApply, program }) => {
     const [formData, setFormData] = useState({
         name: '',
@@ -25,32 +25,47 @@ const ApplicationForm = ({ onApply, program }) => {
         { exam: '', board: '', subjects: '', year: '', percentage: '' }
     ]);
 
-    // State to track if the form is valid for submission
+    // State to track if files are selected (simplified for this example)
+    const [files, setFiles] = useState({
+        registration: null,
+        classX: null,
+        classXII: null,
+        ageProof: null
+    });
+
     const [isFormValid, setIsFormValid] = useState(false);
 
     // Effect to re-evaluate form validity whenever data changes
     useEffect(() => {
         const validateForm = () => {
-            // Check all personal and academic status details
+            // Check all text fields
             for (const key in formData) {
                 if (formData[key].trim() === '') return false;
             }
-            // Check that every field in every academic record is filled
+            // Check all academic records
             for (const record of academicRecords) {
                 for (const key in record) {
                     if (record[key].trim() === '') return false;
                 }
             }
-            // If all checks pass, the form is valid
+            // Check if all files are selected
+            for (const key in files) {
+                if (files[key] === null) return false;
+            }
             return true;
         };
         setIsFormValid(validateForm());
-    }, [formData, academicRecords]);
+    }, [formData, academicRecords, files]);
 
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value.toUpperCase() })); // In CAPS as per proforma
+        setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
+    };
+
+    const handleFileChange = (e) => {
+        const { name, files } = e.target;
+        setFiles(prev => ({ ...prev, [name]: files[0] }));
     };
 
     const handleAcademicChange = (index, e) => {
@@ -64,10 +79,11 @@ const ApplicationForm = ({ onApply, program }) => {
         setAcademicRecords([...academicRecords, { exam: '', board: '', subjects: '', year: '', percentage: '' }]);
     };
     
-    // The 'onApply' prop is now called by the form's own button
     const handleSubmit = (e) => {
         e.preventDefault();
-        onApply();
+        // Here you would typically package the form data and files for submission
+        // For now, it just calls the onApply function
+        onApply(formData, academicRecords);
     }
 
     return (
@@ -93,8 +109,7 @@ const ApplicationForm = ({ onApply, program }) => {
                     <input name="currentSemester" placeholder="Current Semester" onChange={handleInputChange} required />
                     <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
                         <label>Internship Duration (Auto-filled)</label>
-                        {/* This is now a disabled input showing the program's duration */}
-                        <input type="text" value={`${program.progDurationWeeks} weeks`} disabled />
+                        <input type="text" value={`${program.progDurationWeeks} months`} disabled />
                     </div>
                 </div>
             </fieldset>
@@ -117,16 +132,14 @@ const ApplicationForm = ({ onApply, program }) => {
                 <legend>Document Uploads</legend>
                 <p className={styles.uploadInstructions}>Please attach University Registration, Class X & XII Marksheets, and a valid age proof.</p>
                 <div className={styles.formGrid}>
-                    {/* For validation, you would also need state to track if files are selected */}
-                    <div className={styles.inputGroup}><label>University Registration Certificate</label><input type="file" required/></div>
-                    <div className={styles.inputGroup}><label>Class X Marksheet/Certificate</label><input type="file" required/></div>
-                    <div className={styles.inputGroup}><label>Class XII Marksheet/Certificate</label><input type="file" required/></div>
-                    <div className={styles.inputGroup}><label>Valid Age Proof</label><input type="file" required/></div>
+                    <div className={styles.inputGroup}><label>University Registration Certificate</label><input type="file" name="registration" onChange={handleFileChange} required/></div>
+                    <div className={styles.inputGroup}><label>Class X Marksheet/Certificate</label><input type="file" name="classX" onChange={handleFileChange} required/></div>
+                    <div className={styles.inputGroup}><label>Class XII Marksheet/Certificate</label><input type="file" name="classXII" onChange={handleFileChange} required/></div>
+                    <div className={styles.inputGroup}><label>Valid Age Proof</label><input type="file" name="ageProof" onChange={handleFileChange} required/></div>
                 </div>
             </fieldset>
             
             <div className={styles.formActions}>
-                {/* The button is now disabled based on isFormValid state */}
                 <Button type="submit" variant="primary" disabled={!isFormValid}>
                     Submit Application
                 </Button>
@@ -135,7 +148,6 @@ const ApplicationForm = ({ onApply, program }) => {
     );
 };
 
-
 // Main BrowsePrograms component
 const BrowsePrograms = () => {
     const [programs, setPrograms] = useState([]);
@@ -143,13 +155,33 @@ const BrowsePrograms = () => {
     const [error, setError] = useState('');
     const [isApplyDialogOpen, setIsApplyDialogOpen] = useState(false);
     const [selectedProgram, setSelectedProgram] = useState(null);
+    const [appliedProgramIds, setAppliedProgramIds] = useState(new Set());
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            const [programsRes, myApplicationsRes] = await Promise.all([
+                api.get('/programs/public-list'),
+                api.get('/applications/my-applications')
+            ]);
+            
+            setPrograms(programsRes.data);
+
+            const appliedIds = new Set(myApplicationsRes.data.map(app => 
+                programsRes.data.find(p => p.intProgName === app.programName)?.intProgId
+            ));
+            setAppliedProgramIds(appliedIds);
+
+        } catch (err) {
+            setError("Could not load internship programs.");
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        setIsLoading(true);
-        api.get('/programs/public-list')
-            .then(res => setPrograms(res.data))
-            .catch(err => setError("Could not load internship programs."))
-            .finally(() => setIsLoading(false));
+        fetchData();
     }, []);
 
     const handleApplyClick = (program) => {
@@ -157,9 +189,23 @@ const BrowsePrograms = () => {
         setIsApplyDialogOpen(true);
     };
 
-    const handleApplyConfirm = () => {
-        alert(`Successfully applied for ${selectedProgram.intProgName}!`);
-        setIsApplyDialogOpen(false);
+    const handleApplyConfirm = (formData, academicRecords) => {
+        const payload = {
+            programId: selectedProgram.intProgId,
+            formData: { ...formData, academicRecords }
+        };
+
+        api.post('/applications', payload)
+            .then(response => {
+                alert('Application submitted successfully!');
+                setAppliedProgramIds(prevIds => new Set(prevIds).add(selectedProgram.intProgId));
+                setIsApplyDialogOpen(false);
+                fetchData(); // Refetch data to ensure consistency
+            })
+            .catch(err => {
+                alert('Failed to submit application. Please try again.');
+                console.error(err);
+            });
     };
 
     if (isLoading) return <Loader />;
@@ -178,18 +224,13 @@ const BrowsePrograms = () => {
                             </span>
                         </div>
                         <p className={styles.department}>WEBEL - Centre of Excellence</p>
-                        
-                        {/* --- ADDED THIS SECTION --- */}
                         <p className={styles.description}>{prog.intProgDescription}</p>
-                        
                         <div className={styles.detailsGrid}>
-                            <p><strong>Duration:</strong> {prog.progDurationWeeks} weeks</p>
+                            <p><strong>Duration:</strong> {prog.progDurationWeeks} months</p>
                             <p><strong>Type:</strong> {prog.programType?.replace(/_/g, ' ')}</p>
                             <p><strong>Mode:</strong> {prog.programMode}</p>
                             <p><strong>Amount:</strong> ₹{prog.internshipAmount}/{prog.programType === 'PAID_BY_APPLICANT' ? 'one-time' : 'month'}</p>
                         </div>
-
-                        {/* --- ADDED THIS SECTION --- */}
                         {prog.attachmentPath && (
                             <a 
                                 href={`http://localhost:8080/uploads/${prog.attachmentPath.split(/[\\/]/).pop()}`} 
@@ -200,12 +241,15 @@ const BrowsePrograms = () => {
                                 📄 View Program Details
                             </a>
                         )}
-
                         <p className={styles.deadline}>
                             Application Deadline: {new Date(prog.programApplicationEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
                         <div className={styles.cardActions}>
-                            <Button variant="primary" onClick={() => handleApplyClick(prog)}>Apply Now</Button>
+                            {appliedProgramIds.has(prog.intProgId) ? (
+                                <Button variant="secondary" disabled>Already Applied</Button>
+                            ) : (
+                                <Button variant="primary" onClick={() => handleApplyClick(prog)}>Apply Now</Button>
+                            )}
                         </div>
                     </Card>
                 ))}

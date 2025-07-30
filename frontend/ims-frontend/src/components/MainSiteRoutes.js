@@ -13,9 +13,10 @@ import ApplicantLayout from './ApplicantLayout';
 import ApplicantDashboard from './ApplicantDashboard';
 import Profile from './Profile'; // New Profile Page
 import BrowsePrograms from './BrowsePrograms'; // New Browse Page
+import MyInternships from './MyInternships'; // <-- This is the REAL component
 
 // Placeholder components for pages that need backend data
-const MyInternships = () => <div><h2>My Internships Page</h2><p>Details about active and past internships will be shown here.</p></div>;
+// --- REMOVED THE DUPLICATE MyInternships DECLARATION ---
 const MyTasks = () => <div><h2>My Tasks Page</h2><p>A list of all tasks, including pending, completed, and overdue.</p></div>;
 const Certificates = () => <div><h2>My Certificates Page</h2><p>A collection of all earned certificates.</p></div>;
 const Notifications = () => <div><h2>Notifications Page</h2><p>All received notifications will be listed here.</p></div>;

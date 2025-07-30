@@ -6,6 +6,7 @@ import java.time.LocalDate;
 public class InternshipProgramDto {
 
     private Integer intProgId;
+    private String organizationName;
     private String intProgName;
     private String intProgDescription;
     private Integer intOrgId;
@@ -15,9 +16,6 @@ public class InternshipProgramDto {
     private Integer progMaxApplicants;
     private String progStatus;
     private String attachmentPath;
-
-
-    // --- NEW DTO FIELD ---
     private Double internshipAmount;
     private LocalDate programApplicationStartDate;
     private LocalDate programApplicationEndDate;
@@ -27,7 +25,12 @@ public class InternshipProgramDto {
 
     public InternshipProgramDto() {}
 
-    public InternshipProgramDto(InternshipProgram program) {
+    /**
+     * This is the main, detailed constructor that includes organization details.
+     * @param program The program entity.
+     * @param organization The organization entity.
+     */
+    public InternshipProgramDto(InternshipProgram program, OrganizationMaster organization) {
         this.intProgId = program.getIntProgId();
         this.intProgName = program.getIntProgName();
         this.intProgDescription = program.getIntProgDescription();
@@ -38,15 +41,28 @@ public class InternshipProgramDto {
         this.progMaxApplicants = program.getProgMaxApplicants();
         this.progStatus = program.getProgStatus();
         this.attachmentPath = program.getAttachmentPath();
-        
-        // --- MAPPING NEW FIELDS ---
         this.programApplicationStartDate = program.getProgramApplicationStartDate();
         this.programApplicationEndDate = program.getProgramApplicationEndDate();
         this.programEntry = program.getProgramEntry();
         this.programType = program.getProgramType();
         this.programMode = program.getProgramMode();
-        // --- MAPPING NEW FIELD ---
         this.internshipAmount = program.getInternshipAmount();
+
+        if (organization != null) {
+            this.organizationName = organization.getOrgName();
+        } else {
+            this.organizationName = "N/A"; // Provide a default if org is not available
+        }
+    }
+
+    /**
+     * ADDED THIS CONSTRUCTOR TO FIX THE ERROR.
+     * This is a convenience constructor that allows creating a DTO without organization details.
+     * It calls the main constructor, passing 'null' for the organization.
+     * @param program The program entity.
+     */
+    public InternshipProgramDto(InternshipProgram program) {
+        this(program, null);
     }
 
     // --- Getters and Setters ---
@@ -72,8 +88,6 @@ public class InternshipProgramDto {
     public void setProgStatus(String progStatus) { this.progStatus = progStatus; }
     public String getAttachmentPath() { return attachmentPath; }
     public void setAttachmentPath(String attachmentPath) { this.attachmentPath = attachmentPath; }
-
-    // --- Getters and Setters for NEW DTO FIELDS ---
     public LocalDate getProgramApplicationStartDate() { return programApplicationStartDate; }
     public void setProgramApplicationStartDate(LocalDate programApplicationStartDate) { this.programApplicationStartDate = programApplicationStartDate; }
     public LocalDate getProgramApplicationEndDate() { return programApplicationEndDate; }
@@ -84,4 +98,6 @@ public class InternshipProgramDto {
     public void setProgramType(String programType) { this.programType = programType; }
     public String getProgramMode() { return programMode; }
     public void setProgramMode(String programMode) { this.programMode = programMode; }
+    public String getOrganizationName() { return organizationName; }
+    public void setOrganizationName(String organizationName) { this.organizationName = organizationName; }
 }

@@ -1,13 +1,13 @@
 import axios from 'axios';
 
 // Create a new instance of axios
-// const api = axios.create({
-//   baseURL: `${process.env.REACT_APP_API_URL}/api`
-// });
-
 const api = axios.create({
-  baseURL: '/api' // Use the relative path for local development with proxy
+  baseURL: `${process.env.REACT_APP_API_URL}/api`
 });
+
+// const api = axios.create({
+//   baseURL: '/api' // Use the relative path for local development with proxy
+// });
 
 // Add a request interceptor to the instance
 api.interceptors.request.use(

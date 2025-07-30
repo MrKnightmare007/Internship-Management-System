@@ -76,7 +76,7 @@ public class SecurityConfig {
                         // --- ADD THIS LINE ---
                         // Allow UptimeRobot to make HEAD requests to keep the server alive
                         .requestMatchers(HttpMethod.HEAD, "/api/organizations").permitAll()
-
+                        .requestMatchers("/api/applications/**").authenticated()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
 

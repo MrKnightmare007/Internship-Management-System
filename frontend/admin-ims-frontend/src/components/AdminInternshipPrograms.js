@@ -1,14 +1,31 @@
-import React from 'react';
-import styles from './AdminTables.module.css'; // Reusing a common table style
+import React, { useState, useEffect } from 'react';
+import api from '../api';
+import styles from './AdminTables.module.css'; // Reusing the common table style
 import Card from './ui/Card';
+import Loader from './ui/Loader';
 
 const AdminInternshipPrograms = () => {
-    // TODO: This requires a new API endpoint to fetch all programs from all orgs.
-    const allPrograms = [
-        { title: "Data Science & Machine Learning", org: "Centre of Excellence", status: "Active" },
-        { title: "Web Development Internship", org: "WEBEL - IT Department", status: "Active" },
-        { title: "AI & Robotics Internship", org: "Centre of Excellence - Robotics", status: "Closed" },
-    ];
+    const [programs, setPrograms] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        setIsLoading(true);
+        api.get('/programs/all')
+            .then(response => {
+                setPrograms(response.data);
+            })
+            .catch(err => {
+                console.error("Failed to fetch programs:", err);
+                setError("Could not load internship programs. Please try again.");
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }, []);
+
+    if (isLoading) return <Loader />;
+    if (error) return <p className={styles.errorText}>{error}</p>;
 
     return (
         <div>
@@ -17,18 +34,27 @@ const AdminInternshipPrograms = () => {
                 <div className={styles.tableContainer}>
                     <table>
                         <thead>
-                            <tr><th>Program Title</th><th>Organization</th><th>Status</th></tr>
+                            <tr>
+                                <th>Program Title</th>
+                                <th>Organization</th>
+                                <th>Status</th>
+                            </tr>
                         </thead>
                         <tbody>
-                            {allPrograms.map((prog, i) => (
-                                <tr key={i}>
-                                    <td>{prog.title}</td>
-                                    <td>{prog.org}</td>
-                                    <td><span className={`${styles.status} ${styles[prog.status.toLowerCase()]}`}>{prog.status}</span></td>
+                            {programs.map((prog) => (
+                                <tr key={prog.intProgId}>
+                                    <td>{prog.intProgName}</td>
+                                    <td>{prog.organizationName}</td>
+                                    <td>
+                                        <span className={`${styles.status} ${styles[prog.progStatus?.toLowerCase()]}`}>
+                                            {prog.progStatus}
+                                        </span>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                    {programs.length === 0 && <p style={{textAlign: 'center', padding: '20px'}}>No programs found across all organizations.</p>}
                 </div>
             </Card>
         </div>

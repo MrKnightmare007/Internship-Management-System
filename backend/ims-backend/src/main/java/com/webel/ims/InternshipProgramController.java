@@ -28,7 +28,30 @@ public class InternshipProgramController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired 
+    private OrganizationRepository organizationRepository;
+
     private final String UPLOAD_DIR = "./uploads/";
+
+    // --- SUPER ADMIN METHOD ---
+    @GetMapping("/all")
+    public ResponseEntity<List<InternshipProgramDto>> getAllPrograms() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username).orElse(null);
+
+        if (currentUser == null || !"SUPER_ADMIN".equals(currentUser.getUserType())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<InternshipProgram> allPrograms = programRepository.findAll();
+        
+        List<InternshipProgramDto> dtos = allPrograms.stream().map(program -> {
+            OrganizationMaster org = organizationRepository.findById(program.getIntOrgId()).orElse(null);
+            return new InternshipProgramDto(program, org);
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
 
     @PostMapping
     public ResponseEntity<?> createProgram(@RequestBody InternshipProgramRequest programRequest) {
@@ -37,13 +60,14 @@ public class InternshipProgramController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied.");
         }
         InternshipProgram newProgram = new InternshipProgram();
-        mapRequestToEntity(programRequest, newProgram); // Use helper method
+        mapRequestToEntity(programRequest, newProgram);
         newProgram.setIntOrgId(org.getOrgId());
         User currentUser = userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get();
         newProgram.setIntCoordinatorUserId(currentUser.getUserId());
         
         InternshipProgram savedProgram = programRepository.save(newProgram);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new InternshipProgramDto(savedProgram));
+        // CORRECTED: Pass the organization object to the constructor
+        return ResponseEntity.status(HttpStatus.CREATED).body(new InternshipProgramDto(savedProgram, org));
     }
 
     @PutMapping("/{id}")
@@ -58,9 +82,10 @@ public class InternshipProgramController {
         if (!existingProgram.getIntOrgId().equals(org.getOrgId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied.");
         }
-        mapRequestToEntity(programRequest, existingProgram); // Use helper method
+        mapRequestToEntity(programRequest, existingProgram);
         InternshipProgram updatedProgram = programRepository.save(existingProgram);
-        return ResponseEntity.ok(new InternshipProgramDto(updatedProgram));
+        // CORRECTED: Pass the organization object to the constructor
+        return ResponseEntity.ok(new InternshipProgramDto(updatedProgram, org));
     }
 
     @PostMapping("/{id}/upload-document")
@@ -84,7 +109,8 @@ public class InternshipProgramController {
             program.setAttachmentPath(filePath);
             programRepository.save(program);
         }
-        return ResponseEntity.ok(new InternshipProgramDto(program));
+        // CORRECTED: Pass the organization object to the constructor
+        return ResponseEntity.ok(new InternshipProgramDto(program, org));
     }
 
     private void mapRequestToEntity(InternshipProgramRequest request, InternshipProgram entity) {
@@ -123,9 +149,11 @@ public class InternshipProgramController {
     @GetMapping("/public-list")
     public ResponseEntity<List<InternshipProgramDto>> getPublicPrograms() {
         List<InternshipProgram> programs = programRepository.findByProgStatus("ACTIVE");
-        List<InternshipProgramDto> dtos = programs.stream()
-                .map(InternshipProgramDto::new)
-                .collect(Collectors.toList());
+        // CORRECTED: Now fetches the organization for each program to provide its name
+        List<InternshipProgramDto> dtos = programs.stream().map(program -> {
+            OrganizationMaster org = organizationRepository.findById(program.getIntOrgId()).orElse(null);
+            return new InternshipProgramDto(program, org);
+        }).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
     
@@ -146,7 +174,10 @@ public class InternshipProgramController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied or user not associated with an organization.");
         }
         List<InternshipProgram> programs = programRepository.findByIntOrgId(org.getOrgId());
-        List<InternshipProgramDto> dtos = programs.stream().map(InternshipProgramDto::new).collect(Collectors.toList());
+        // CORRECTED: Pass the organization object to the constructor
+        List<InternshipProgramDto> dtos = programs.stream()
+            .map(program -> new InternshipProgramDto(program, org))
+            .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
 
