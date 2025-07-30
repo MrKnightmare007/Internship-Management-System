@@ -42,41 +42,48 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            
-            .cors(cors -> cors.configurationSource(request -> {
-                var corsConfig = new CorsConfiguration();
-                // Local development URLs
-                corsConfig.addAllowedOrigin("http://localhost:3000");
-                corsConfig.addAllowedOrigin("http://admin.localhost:3000");
-                corsConfig.addAllowedOrigin("http://organization.localhost:3000");
-                
-                // Add your Vercel Production URLs
-                corsConfig.addAllowedOrigin("https://dev-internship-management-system-pi.vercel.app"); // Your main site
-                corsConfig.addAllowedOrigin("https://admin-ims-webel.vercel.app"); // Your admin site (or whatever you named it)
-                corsConfig.addAllowedOrigin("https://org-ims-webel.vercel.app"); // Your org site (or whatever you named it)
-            
-                corsConfig.addAllowedMethod("*");
-                corsConfig.addAllowedHeader("*");
-                corsConfig.setAllowCredentials(true);
-                return corsConfig;
-            }))
-            
-            .authorizeHttpRequests(requests -> requests
-                // Allow all authentication endpoints, including new applicant registration/login
-                .requestMatchers("/api/auth/**").permitAll()
-                
-                // Allow public viewing of organizations (for dropdowns) and active programs
-                .requestMatchers(HttpMethod.GET, "/api/organizations", "/api/programs/public-list").permitAll()
-                
-                .requestMatchers("/error").permitAll()
-                .anyRequest().authenticated()
-            )
-            
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
-            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-            
+                .csrf(csrf -> csrf.disable())
+
+                .cors(cors -> cors.configurationSource(request -> {
+                    var corsConfig = new CorsConfiguration();
+                    // Local development URLs
+                    corsConfig.addAllowedOrigin("http://localhost:3000");
+                    corsConfig.addAllowedOrigin("http://admin.localhost:3000");
+                    corsConfig.addAllowedOrigin("http://organization.localhost:3000");
+
+                    // Add your Vercel Production URLs
+                    corsConfig.addAllowedOrigin("https://dev-internship-management-system-pi.vercel.app"); // Your main
+                                                                                                           // site
+                    corsConfig.addAllowedOrigin("https://admin-ims-webel.vercel.app"); // Your admin site (or whatever
+                                                                                       // you named it)
+                    corsConfig.addAllowedOrigin("https://org-ims-webel.vercel.app"); // Your org site (or whatever you
+                                                                                     // named it)
+
+                    corsConfig.addAllowedMethod("*");
+                    corsConfig.addAllowedHeader("*");
+                    corsConfig.setAllowCredentials(true);
+                    return corsConfig;
+                }))
+
+                .authorizeHttpRequests(requests -> requests
+                        // Allow all authentication endpoints, including new applicant
+                        // registration/login
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // Allow public GET requests for organizations and programs
+                        .requestMatchers(HttpMethod.GET, "/api/organizations", "/api/programs/public-list").permitAll()
+
+                        // --- ADD THIS LINE ---
+                        // Allow UptimeRobot to make HEAD requests to keep the server alive
+                        .requestMatchers(HttpMethod.HEAD, "/api/organizations").permitAll()
+
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated())
+
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }
