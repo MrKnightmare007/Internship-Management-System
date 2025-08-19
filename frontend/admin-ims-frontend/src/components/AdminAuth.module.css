@@ -198,60 +198,6 @@
   }
   
   .authCard {
-    padding: 2rem 1.5rem;
-    border-radius: 20px;
+    padding: 1.5rem;
   }
-  
-  .title {
-    font-size: 1.75rem;
-  }
-  
-  .submitButton {
-    padding: 0.875rem;
-  }
-}
-
-/* Loading Animation */
-.submitButton:disabled::after {
-  content: '';
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-left: 8px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Password Strength Indicator */
-.passwordStrength {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.strengthBar {
-  width: 100%;
-  height: 4px;
-  background: #e5e7eb;
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 0.25rem;
-}
-
-.strengthFill {
-  height: 100%;
-  transition: all 0.3s ease;
-  border-radius: 2px;
-}
-
-.strengthText {
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: color 0.3s ease;
 }

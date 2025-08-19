@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-
 import ApplicantRegister from './ApplicantRegister';
 import ApplicantLogin from './ApplicantLogin';
 import LandingPage from './LandingPage'; // This is the simple hero page now
+import Internships from './Internships'; // New Internships page
 import PublicNavbar from './ui/PublicNavbar'; // The detailed WEBEL navbar
 import Footer from './ui/Footer'; // The detailed WEBEL footer
 
@@ -45,6 +46,7 @@ function MainSiteRoutes() {
         {/* --- Public Routes --- */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/internships" element={<Internships />} />
           <Route path="/login" element={<ApplicantLogin />} />
           <Route path="/register" element={<ApplicantRegister />} />
         </Route>

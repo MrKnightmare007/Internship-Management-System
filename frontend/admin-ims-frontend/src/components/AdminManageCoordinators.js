@@ -5,14 +5,36 @@ import Card from './ui/Card';
 import Button from './ui/Button';
 import Loader from './ui/Loader';
 
+// Simple Toaster Component
+const Toaster = ({ message, type, onClose }) => {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onClose();
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+        <div className={`${styles.toaster} ${styles[type]}`}>
+            <span>{message}</span>
+            <button onClick={onClose} className={styles.toasterClose}>×</button>
+        </div>
+    );
+};
+
 // Sub-component for creating/viewing masters for the selected org
 const OrgAdminsManager = ({ orgId, orgName, onAdminCreated }) => {
     const [admins, setAdmins] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [newAdminUsername, setNewAdminUsername] = useState('');
     const [newAdminEmail, setNewAdminEmail] = useState('');
+    const [internshipName, setInternshipName] = useState('');
+    const [advertisementDocument, setAdvertisementDocument] = useState(null);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    const [toaster, setToaster] = useState(null);
+    const [editingAdmin, setEditingAdmin] = useState(null);
+    const [isCreating, setIsCreating] = useState(false);
 
     const fetchAdmins = () => {
         if (orgId) {
@@ -28,17 +50,125 @@ const OrgAdminsManager = ({ orgId, orgName, onAdminCreated }) => {
         fetchAdmins();
     }, [orgId]);
 
+    const resetForm = () => {
+        setNewAdminUsername('');
+        setNewAdminEmail('');
+        setInternshipName('');
+        setAdvertisementDocument(null);
+        setEditingAdmin(null);
+        // Reset file input
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) fileInput.value = '';
+    };
+
     const handleCreateAdmin = () => {
         setError('');
         setMessage('');
-        api.post('/organization-admins/create', { username: newAdminUsername, email: newAdminEmail, orgId })
+
+        if (!newAdminUsername || !newAdminEmail || !internshipName) {
+            setError('Please fill in all required fields');
+            return;
+        }
+
+        setIsCreating(true);
+        const formData = new FormData();
+        formData.append('username', newAdminUsername);
+        formData.append('email', newAdminEmail);
+        formData.append('orgId', orgId);
+        formData.append('internshipName', internshipName);
+        formData.append('orgName', orgName);
+
+        if (advertisementDocument) {
+            formData.append('advertisementDocument', advertisementDocument);
+        }
+
+        api.post('/organization-admins/create', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
             .then(res => {
-                setMessage(res.data.message);
-                setNewAdminUsername('');
-                setNewAdminEmail('');
-                onAdminCreated(); // Callback to refresh the list
+                setToaster({
+                    message: 'Coordinator created successfully! Welcome email sent.',
+                    type: 'success'
+                });
+                resetForm();
+                fetchAdmins(); // Refresh the list
             })
-            .catch(err => setError(err.response?.data?.message || "Creation failed"));
+            .catch(err => {
+                setError(err.response?.data?.message || "Creation failed");
+                setToaster({
+                    message: 'Failed to create coordinator. Please try again.',
+                    type: 'error'
+                });
+            })
+            .finally(() => {
+                setIsCreating(false);
+            });
+    };
+
+    const handleEditAdmin = (admin) => {
+        setEditingAdmin(admin);
+        setNewAdminUsername(admin.username);
+        setNewAdminEmail(admin.userEmail);
+        setInternshipName(''); // This would need to be stored if we want to edit it
+    };
+
+    const handleUpdateAdmin = () => {
+        setError('');
+        setMessage('');
+
+        if (!newAdminUsername || !newAdminEmail) {
+            setError('Please fill in all required fields');
+            return;
+        }
+
+        setIsCreating(true);
+        const updateData = {
+            userId: editingAdmin.userId,
+            username: newAdminUsername,
+            email: newAdminEmail,
+            orgName: orgName
+        };
+
+        api.put('/organization-admins/update', updateData)
+            .then(res => {
+                setToaster({
+                    message: 'Coordinator updated successfully! Notification email sent.',
+                    type: 'success'
+                });
+                resetForm();
+                fetchAdmins();
+            })
+            .catch(err => {
+                setError(err.response?.data?.message || "Update failed");
+                setToaster({
+                    message: 'Failed to update coordinator. Please try again.',
+                    type: 'error'
+                });
+            })
+            .finally(() => {
+                setIsCreating(false);
+            });
+    };
+
+    const handleDeleteAdmin = (admin) => {
+        if (window.confirm(`Are you sure you want to delete coordinator "${admin.username}"? This action cannot be undone.`)) {
+            api.delete(`/organization-admins/delete/${admin.userId}`, {
+                data: { orgName: orgName }
+            })
+                .then(res => {
+                    setToaster({
+                        message: 'Coordinator deleted successfully! Notification email sent.',
+                        type: 'success'
+                    });
+                    fetchAdmins();
+                })
+                .catch(err => {
+                    setToaster({
+                        message: 'Failed to delete coordinator. Please try again.',
+                        type: 'error'
+                    });
+                });
+        }
     };
 
     return (
@@ -46,20 +176,101 @@ const OrgAdminsManager = ({ orgId, orgName, onAdminCreated }) => {
             <h3 className={styles.cardTitle}>Organization Masters for: {orgName}</h3>
             {isLoading ? <Loader /> : (
                 <div className={styles.adminList}>
-                    <h4>Current Masters:</h4>
+                    <h4>Current Coordinators:</h4>
                     {admins.length > 0 ? (
-                        <ul>{admins.map(admin => <li key={admin.userId}>{admin.username} ({admin.userEmail})</li>)}</ul>
-                    ) : <p>No masters found for this organization.</p>}
+                        <div className={styles.adminTable}>
+                            {admins.map(admin => (
+                                <div key={admin.userId} className={styles.adminRow}>
+                                    <div className={styles.adminInfo}>
+                                        <strong>{admin.username}</strong>
+                                        <span>{admin.userEmail}</span>
+                                    </div>
+                                    <div className={styles.adminActions}>
+                                        <button
+                                            onClick={() => handleEditAdmin(admin)}
+                                            className={styles.editBtn}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteAdmin(admin)}
+                                            className={styles.deleteBtn}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : <p>No coordinators found for this organization.</p>}
                 </div>
             )}
             <div className={styles.createAdminForm}>
-                <h4>Create New Master:</h4>
-                <input type="text" placeholder="Username" value={newAdminUsername} onChange={e => setNewAdminUsername(e.target.value)} />
-                <input type="email" placeholder="Email" value={newAdminEmail} onChange={e => setNewAdminEmail(e.target.value)} />
-                <Button onClick={handleCreateAdmin}>Create Master</Button>
+                <h4>{editingAdmin ? 'Edit Coordinator:' : 'Create New Coordinator:'}</h4>
+                <div className={styles.formGrid}>
+                    <input
+                        type="text"
+                        placeholder="Username *"
+                        value={newAdminUsername}
+                        onChange={e => setNewAdminUsername(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="email"
+                        placeholder="Email *"
+                        value={newAdminEmail}
+                        onChange={e => setNewAdminEmail(e.target.value)}
+                        required
+                    />
+                    {!editingAdmin && (
+                        <>
+                            <input
+                                type="text"
+                                placeholder="Internship Name *"
+                                value={internshipName}
+                                onChange={e => setInternshipName(e.target.value)}
+                                required
+                            />
+                            <div className={styles.fileInputGroup}>
+                                <label htmlFor="advertisementDoc">Advertisement Document (Optional):</label>
+                                <input
+                                    id="advertisementDoc"
+                                    type="file"
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                    onChange={e => setAdvertisementDocument(e.target.files[0])}
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+                <div className={styles.formActions}>
+                    <Button
+                        onClick={editingAdmin ? handleUpdateAdmin : handleCreateAdmin}
+                        className={styles.createBtn}
+                        disabled={isCreating}
+                    >
+                        {isCreating ? 'Processing...' : (editingAdmin ? 'Update Coordinator' : 'Create Coordinator')}
+                    </Button>
+                    {editingAdmin && (
+                        <Button
+                            onClick={resetForm}
+                            className={styles.cancelBtn}
+                        >
+                            Cancel
+                        </Button>
+                    )}
+                </div>
                 {error && <p className={styles.errorText}>{error}</p>}
                 {message && <p className={styles.successText}>{message}</p>}
             </div>
+
+            {toaster && (
+                <Toaster
+                    message={toaster.message}
+                    type={toaster.type}
+                    onClose={() => setToaster(null)}
+                />
+            )}
         </Card>
     );
 };
@@ -108,7 +319,7 @@ const SendNotificationManager = ({ orgId, orgName }) => {
 
     return (
         <Card>
-            <h3 className={styles.cardTitle}>Send Notification to: {orgName}</h3>
+            <h3 className={styles.cardTitle}>Send Notification to Coordinator</h3>
             <div className={styles.notificationForm}>
                 <select value={selectedAdminId} onChange={e => setSelectedAdminId(e.target.value)}>
                     {admins.length > 0 ? admins.map(admin => (
@@ -149,7 +360,7 @@ const AdminManageCoordinators = () => {
             setSelectedOrg(org);
         }
     };
-    
+
     if (isLoading) return <Loader />;
     if (error) return <p className={styles.errorText}>{error}</p>;
 
@@ -157,7 +368,7 @@ const AdminManageCoordinators = () => {
         <div>
             <h1 className={styles.pageTitle}>Manage Organization Masters</h1>
             <p className={styles.instructions}>Select an organization from the list below to manage its masters and send notifications.</p>
-            
+
             <Card className={styles.tableCard}>
                 <div className={styles.tableContainer}>
                     <table>
@@ -180,9 +391,9 @@ const AdminManageCoordinators = () => {
 
             {selectedOrg && (
                 <div className={styles.managementSection}>
-                    <OrgAdminsManager 
-                        orgId={selectedOrg.orgId} 
-                        orgName={selectedOrg.orgName} 
+                    <OrgAdminsManager
+                        orgId={selectedOrg.orgId}
+                        orgName={selectedOrg.orgName}
                         onAdminCreated={() => handleSelectOrg(selectedOrg)} // Simple refresh by toggling
                     />
                     <SendNotificationManager orgId={selectedOrg.orgId} orgName={selectedOrg.orgName} />

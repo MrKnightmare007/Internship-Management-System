@@ -1,24 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import styles from './OrganizationLogin.module.css'; // New CSS module
+import styles from './OrganizationAuth.module.css';
 import Card from './ui/Card';
 import Button from './ui/Button';
 import Loader from './ui/Loader';
+import EnhancedInput from './ui/EnhancedInput';
+import OTPInput from './ui/OTPInput';
 
 function OrganizationLogin() {
-  // All original state and logic is preserved
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [otp, setOtp] = useState('');
-  const [organizations, setOrganizations] = useState([]);
-  const [selectedOrg, setSelectedOrg] = useState('');
-  const [isFetchingOrgs, setIsFetchingOrgs] = useState(true);
-  
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    email: '',
+    otp: '',
+    newPassword: '',
+    confirmPassword: '',
+    selectedOrg: ''
+  });
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showOtpForm, setShowOtpForm] = useState(false);
+  const [message, setMessage] = useState('');
+  const [currentStep, setCurrentStep] = useState('login'); // login, forgotPassword, verifyOTP, resetPassword
+  const [organizations, setOrganizations] = useState([]);
+  const [isFetchingOrgs, setIsFetchingOrgs] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,105 +32,354 @@ function OrganizationLogin() {
       .then(response => {
         setOrganizations(response.data);
         if (response.data.length > 0) {
-          setSelectedOrg(response.data[0].orgId);
+          setFormData(prev => ({
+            ...prev,
+            selectedOrg: response.data[0].orgId
+          }));
         }
         setIsFetchingOrgs(false);
       })
       .catch(err => {
         console.error("Failed to fetch organizations", err);
-        setError("Could not load organization list. Please refresh.");
+        setErrors({ general: "Could not load organization list. Please refresh." });
         setIsFetchingOrgs(false);
       });
   }, []);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (!selectedOrg) {
-      setError("Please select an organization.");
-      return;
+  const handleInputChange = (field) => (e) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: e.target.value
+    }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
     }
-    setError('');
-    setMessage('');
-    setIsLoading(true);
-    api.post('/auth/org-login', { username, password, orgId: selectedOrg })
-      .then(response => {
-        setIsLoading(false);
-        setMessage(response.data.message);
-        setShowOtpForm(true);
-      })
-      .catch(err => {
-        setIsLoading(false);
-        setError(err.response?.data?.message || 'Login failed.');
-      });
   };
 
-  const handleVerifyOtp = (e) => {
+  const handleOTPChange = (otpValue) => {
+    setFormData(prev => ({
+      ...prev,
+      otp: otpValue
+    }));
+    if (errors.otp) {
+      setErrors(prev => ({
+        ...prev,
+        otp: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (currentStep === 'login') {
+      if (!formData.selectedOrg) newErrors.selectedOrg = 'Please select an organization';
+      if (!formData.username.trim()) newErrors.username = 'Username is required';
+      if (!formData.password) newErrors.password = 'Password is required';
+    } else if (currentStep === 'forgotPassword') {
+      if (!formData.email.trim()) newErrors.email = 'Email is required';
+      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+    } else if (currentStep === 'verifyOTP') {
+      if (!formData.otp || formData.otp.length !== 6) newErrors.otp = 'Please enter a valid 6-digit OTP';
+    } else if (currentStep === 'resetPassword') {
+      if (!formData.newPassword) newErrors.newPassword = 'New password is required';
+      else if (formData.newPassword.length < 6) newErrors.newPassword = 'Password must be at least 6 characters';
+      if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+      else if (formData.newPassword !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
+    if (!validateForm()) return;
+
     setIsLoading(true);
-    api.post('/auth/verify-otp', { username, otp })
-      .then(response => {
-        setIsLoading(false);
+    try {
+      const response = await api.post('/auth/org-login', {
+        username: formData.username,
+        password: formData.password,
+        orgId: formData.selectedOrg
+      });
+      setMessage(response.data.message);
+      setCurrentStep('verifyOTP');
+    } catch (err) {
+      setErrors({ general: err.response?.data?.message || 'Login failed.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      await api.post('/auth/forgot-password', { email: formData.email });
+      setMessage('OTP sent to your email. Please check your inbox.');
+      setCurrentStep('verifyOTP');
+    } catch (err) {
+      setErrors({ email: err.response?.data?.message || 'Failed to send OTP.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      if (currentStep === 'verifyOTP' && formData.username) {
+        // For login flow
+        const response = await api.post('/auth/verify-otp', {
+          username: formData.username,
+          otp: formData.otp
+        });
         localStorage.setItem('token', response.data.token);
         navigate('/organization-dashboard');
-      })
-      .catch(err => {
-        setIsLoading(false);
-        setError(err.response?.data?.message || 'Invalid OTP.');
-      });
+      } else {
+        // For forgot password flow
+        await api.post('/auth/verify-reset-otp', {
+          email: formData.email,
+          otp: formData.otp
+        });
+        setMessage('OTP verified successfully. Please set your new password.');
+        setCurrentStep('resetPassword');
+      }
+    } catch (err) {
+      setErrors({ otp: err.response?.data?.message || 'Invalid OTP.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      await api.post('/auth/reset-password', {
+        email: formData.email,
+        otp: formData.otp,
+        newPassword: formData.newPassword
+      });
+      setMessage('Password reset successfully! Redirecting to login...');
+      setTimeout(() => {
+        setCurrentStep('login');
+        setFormData({
+          username: '',
+          password: '',
+          email: '',
+          otp: '',
+          newPassword: '',
+          confirmPassword: '',
+          selectedOrg: formData.selectedOrg
+        });
+        setMessage('');
+      }, 2000);
+    } catch (err) {
+      setErrors({ general: err.response?.data?.message || 'Failed to reset password.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderLoginForm = () => (
-    <form onSubmit={handleLogin}>
-      <p className={styles.instructions}>Select your organization and enter your credentials.</p>
-      <div className={styles.inputGroup}>
-        <label htmlFor="organization">Organization</label>
-        {isFetchingOrgs ? <Loader /> : (
-          <select id="organization" value={selectedOrg} onChange={(e) => setSelectedOrg(e.target.value)} required>
-            <option value="">-- Select --</option>
+    <form onSubmit={handleLogin} className={styles.form}>
+      <div className={styles.selectContainer}>
+        <label className={styles.selectLabel}>Organization</label>
+        {isFetchingOrgs ? (
+          <div className={styles.loaderContainer}><Loader /></div>
+        ) : (
+          <select 
+            className={`${styles.select} ${errors.selectedOrg ? styles.error : ''}`}
+            value={formData.selectedOrg} 
+            onChange={handleInputChange('selectedOrg')}
+            required
+          >
+            <option value="">-- Select Organization --</option>
             {organizations.map(org => (
               <option key={org.orgId} value={org.orgId}>{org.orgName}</option>
             ))}
           </select>
         )}
+        {errors.selectedOrg && <span className={styles.errorText}>{errors.selectedOrg}</span>}
       </div>
-      <div className={styles.inputGroup}>
-        <label htmlFor="username">Username</label>
-        <input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="Enter username"/>
+      
+      <EnhancedInput
+        type="text"
+        label="Username"
+        placeholder="Enter your username"
+        value={formData.username}
+        onChange={handleInputChange('username')}
+        error={errors.username}
+        icon="👤"
+        required
+      />
+      <EnhancedInput
+        type="password"
+        label="Password"
+        placeholder="Enter your password"
+        value={formData.password}
+        onChange={handleInputChange('password')}
+        error={errors.password}
+        icon="🔒"
+        showPasswordToggle
+        required
+      />
+      <Button type="submit" className={styles.submitButton} disabled={isLoading || isFetchingOrgs}>
+        {isLoading ? 'Logging in...' : 'Login'}
+      </Button>
+      <div className={styles.linkContainer}>
+        <button
+          type="button"
+          className={styles.linkButton}
+          onClick={() => setCurrentStep('forgotPassword')}
+        >
+          Forgot Password?
+        </button>
       </div>
-      <div className={styles.inputGroup}>
-        <label htmlFor="password">Password</label>
-        <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Enter password" />
+    </form>
+  );
+
+  const renderForgotPasswordForm = () => (
+    <form onSubmit={handleForgotPassword} className={styles.form}>
+      <p className={styles.instructions}>
+        Enter your email address and we'll send you an OTP to reset your password.
+      </p>
+      <EnhancedInput
+        type="email"
+        label="Email Address"
+        placeholder="Enter your email"
+        value={formData.email}
+        onChange={handleInputChange('email')}
+        error={errors.email}
+        icon="📧"
+        required
+      />
+      <Button type="submit" className={styles.submitButton} disabled={isLoading}>
+        {isLoading ? 'Sending OTP...' : 'Send OTP'}
+      </Button>
+      <div className={styles.linkContainer}>
+        <button
+          type="button"
+          className={styles.linkButton}
+          onClick={() => setCurrentStep('login')}
+        >
+          Back to Login
+        </button>
       </div>
-      <Button type="submit" variant="primary" disabled={isLoading || isFetchingOrgs} className={styles.submitButton}>
-        {isLoading ? 'Logging In...' : 'LOGIN'}
+    </form>
+  );
+
+  const renderVerifyOTPForm = () => (
+    <form onSubmit={handleVerifyOTP} className={styles.form}>
+      <p className={styles.instructions}>
+        Enter the 6-digit OTP sent to your {formData.username ? 'organization email' : 'email address'}.
+      </p>
+      <div className={styles.otpSection}>
+        <label className={styles.otpLabel}>One-Time Password</label>
+        <OTPInput
+          length={6}
+          value={formData.otp}
+          onChange={handleOTPChange}
+          error={errors.otp}
+        />
+      </div>
+      <Button type="submit" className={styles.submitButton} disabled={isLoading}>
+        {isLoading ? 'Verifying...' : 'Verify OTP'}
+      </Button>
+      <div className={styles.linkContainer}>
+        <button
+          type="button"
+          className={styles.linkButton}
+          onClick={() => formData.username ? handleLogin : handleForgotPassword}
+        >
+          Resend OTP
+        </button>
+      </div>
+    </form>
+  );
+
+  const renderResetPasswordForm = () => (
+    <form onSubmit={handleResetPassword} className={styles.form}>
+      <p className={styles.instructions}>
+        Create a new password for your account.
+      </p>
+      <EnhancedInput
+        type="password"
+        label="New Password"
+        placeholder="Enter new password"
+        value={formData.newPassword}
+        onChange={handleInputChange('newPassword')}
+        error={errors.newPassword}
+        icon="🔒"
+        showPasswordToggle
+        required
+      />
+      <EnhancedInput
+        type="password"
+        label="Confirm Password"
+        placeholder="Confirm new password"
+        value={formData.confirmPassword}
+        onChange={handleInputChange('confirmPassword')}
+        error={errors.confirmPassword}
+        icon="🔒"
+        showPasswordToggle
+        required
+      />
+      <Button type="submit" className={styles.submitButton} disabled={isLoading}>
+        {isLoading ? 'Resetting...' : 'Reset Password'}
       </Button>
     </form>
   );
 
-  const renderOtpForm = () => (
-    <form onSubmit={handleVerifyOtp}>
-       <p className={styles.instructions}>A 6-digit code has been sent to your email. Please enter it below.</p>
-       <div className={styles.inputGroup}>
-        <label htmlFor="otp">One-Time Password (OTP)</label>
-        <input id="otp" type="text" value={otp} onChange={(e) => setOtp(e.target.value)} required placeholder="Enter 6-digit code" maxLength="6" className={styles.otpInput}/>
-      </div>
-      <Button type="submit" variant="primary" disabled={isLoading} className={styles.submitButton}>
-        {isLoading ? 'Verifying...' : 'Verify & Login'}
-      </Button>
-    </form>
-  );
+  const getTitle = () => {
+    switch (currentStep) {
+      case 'forgotPassword': return 'Forgot Password';
+      case 'verifyOTP': return 'Verify OTP';
+      case 'resetPassword': return 'Reset Password';
+      default: return 'Organization Login';
+    }
+  };
 
+  const getSubtitle = () => {
+    switch (currentStep) {
+      case 'forgotPassword': return 'Reset your password';
+      case 'verifyOTP': return 'Check your email';
+      case 'resetPassword': return 'Create new password';
+      default: return 'Sign in to your account';
+    }
+  };
 
   return (
     <div className={styles.pageContainer}>
-      <Card className={styles.loginCard}>
-        <h1 className={styles.title}>Organization Master Login</h1>
-        {!showOtpForm ? renderLoginForm() : renderOtpForm()}
-        {message && !error && <p className={styles.message}>{message}</p>}
-        {error && <p className={styles.error}>{error}</p>}
-      </Card>
+      <div className={styles.authContainer}>
+        <Card className={styles.authCard}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>{getTitle()}</h1>
+            <p className={styles.subtitle}>{getSubtitle()}</p>
+          </div>
+
+          {currentStep === 'login' && renderLoginForm()}
+          {currentStep === 'forgotPassword' && renderForgotPasswordForm()}
+          {currentStep === 'verifyOTP' && renderVerifyOTPForm()}
+          {currentStep === 'resetPassword' && renderResetPasswordForm()}
+
+          {message && <div className={styles.message}>{message}</div>}
+          {errors.general && <div className={styles.error}>{errors.general}</div>}
+        </Card>
+      </div>
     </div>
   );
 }

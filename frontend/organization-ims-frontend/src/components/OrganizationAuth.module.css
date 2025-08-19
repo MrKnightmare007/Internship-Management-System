@@ -1,4 +1,3 @@
-/* Modern Auth Page Styles */
 .pageContainer {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -25,21 +24,15 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
+  animation: fadeIn 0.5s ease;
 }
 
 .authCard {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 24px;
-  padding: 2.5rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.authCard:hover {
-  transform: translateY(-5px);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background: white;
 }
 
 .header {
@@ -50,7 +43,6 @@
 .title {
   font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
   margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
@@ -59,9 +51,8 @@
 }
 
 .subtitle {
-  color: #6b7280;
   font-size: 1rem;
-  margin: 0;
+  color: #6b7280;
 }
 
 .form {
@@ -180,6 +171,44 @@
   animation: slideIn 0.3s ease;
 }
 
+.selectContainer {
+  margin-bottom: 1.5rem;
+}
+
+.selectLabel {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.select {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  background-color: white;
+  color: #1f2937;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+.select:hover {
+  border-color: #d1d5db;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -191,6 +220,15 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
   .pageContainer {
@@ -198,60 +236,6 @@
   }
   
   .authCard {
-    padding: 2rem 1.5rem;
-    border-radius: 20px;
+    padding: 1.5rem;
   }
-  
-  .title {
-    font-size: 1.75rem;
-  }
-  
-  .submitButton {
-    padding: 0.875rem;
-  }
-}
-
-/* Loading Animation */
-.submitButton:disabled::after {
-  content: '';
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-left: 8px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Password Strength Indicator */
-.passwordStrength {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.strengthBar {
-  width: 100%;
-  height: 4px;
-  background: #e5e7eb;
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 0.25rem;
-}
-
-.strengthFill {
-  height: 100%;
-  transition: all 0.3s ease;
-  border-radius: 2px;
-}
-
-.strengthText {
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: color 0.3s ease;
 }

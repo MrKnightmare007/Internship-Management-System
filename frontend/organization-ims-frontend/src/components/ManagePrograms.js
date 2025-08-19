@@ -69,7 +69,7 @@ const ProgramForm = ({ program, onSave, onCancel, isSaving }) => {
             <div><label>Program Mode</label><select name="programMode" value={currentProgram.programMode} onChange={handleInputChange}><option value="ONLINE">Online</option><option value="OFFLINE">Offline</option><option value="HYBRID">Hybrid</option></select></div>
             <div><label>Program Type</label><select name="programType" value={currentProgram.programType} onChange={handleInputChange}><option value="FREE">Free</option><option value="PAID_BY_ORGANIZATION">Paid by Organization</option><option value="PAID_BY_APPLICANT">Paid by Applicant</option></select></div>
             <div><label>Internship Amount (₹)</label><input name="internshipAmount" type="number" value={currentProgram.internshipAmount} onChange={handleInputChange} disabled={currentProgram.programType === 'FREE'} /></div>
-            <div><label>Max Applicants</label><input name="progMaxApplicants" type="number" value={currentProgram.progMaxApplicants} onChange={handleInputChange} /></div>
+            <div><label>No. of Internships Available</label><input name="progMaxApplicants" type="number" value={currentProgram.progMaxApplicants} onChange={handleInputChange} /></div>
             <div><label>Program Status</label><select name="progStatus" value={currentProgram.progStatus} onChange={handleInputChange}><option value="DRAFT">Draft</option><option value="ACTIVE">Active</option><option value="CLOSED">Closed</option></select></div>
             <div><label>Calculated Duration</label><input type="text" value={`${currentProgram.progDurationWeeks} weeks`} disabled /></div>
             <div><label>Program Document</label><input type="file" onChange={handleFileChange} /></div>
@@ -164,7 +164,7 @@ const ManagePrograms = () => {
     <div>
       <div className={styles.header}>
         <h1 className={styles.pageTitle}>Manage Internship Programs</h1>
-        <Button onClick={handleCreateNew} variant="primary">+ Create Program</Button>
+        <Button onClick={handleCreateNew} variant="primary">+ Create Internship Program</Button>
       </div>
       <Card>
         <div className={styles.tableContainer}>

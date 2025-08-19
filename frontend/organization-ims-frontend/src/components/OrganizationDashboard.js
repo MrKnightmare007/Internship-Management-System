@@ -83,7 +83,7 @@ const ProgramForm = ({ program, onSave, onCancel, isSaving }) => {
         <div><label>Program Mode</label><select name="programMode" value={currentProgram.programMode} onChange={handleInputChange}><option value="ONLINE">Online</option><option value="OFFLINE">Offline</option><option value="HYBRID">Hybrid</option></select></div>
         <div><label>Program Type</label><select name="programType" value={currentProgram.programType} onChange={handleInputChange}><option value="FREE">Free</option><option value="PAID_BY_ORGANIZATION">Paid by Organization</option><option value="PAID_BY_APPLICANT">Paid by Applicant</option></select></div>
         <div><label>Internship Amount (₹)</label><input name="internshipAmount" type="number" value={currentProgram.internshipAmount} onChange={handleInputChange} disabled={currentProgram.programType === 'FREE'} /></div>
-        <div><label>Max Applicants</label><input name="progMaxApplicants" type="number" value={currentProgram.progMaxApplicants} onChange={handleInputChange} /></div>
+        <div><label>No. of Internships Available</label><input name="progMaxApplicants" type="number" value={currentProgram.progMaxApplicants} onChange={handleInputChange} /></div>
         <div><label>Program Status</label><select name="progStatus" value={currentProgram.progStatus} onChange={handleInputChange}><option value="DRAFT">Draft</option><option value="ACTIVE">Active</option><option value="CLOSED">Closed</option></select></div>
         <div><label>Calculated Duration</label><input type="text" value={`${currentProgram.progDurationWeeks} weeks`} disabled /></div>
         <div><label>Program Document</label><input type="file" onChange={handleFileChange} /></div>
@@ -145,7 +145,7 @@ function OrganizationDashboard() {
     setEditingProgram(program);
     setIsFormOpen(true);
   };
-  
+
   const openDeleteDialog = (program) => {
     setProgramToDelete(program);
     setIsDeleteDialogOpen(true);
@@ -154,9 +154,9 @@ function OrganizationDashboard() {
   const handleDeleteConfirm = () => {
     if (!programToDelete) return;
     api.delete(`/programs/${programToDelete.intProgId}`).then(() => {
-        fetchAllData(); // Refresh all data
-        setIsDeleteDialogOpen(false);
-        setProgramToDelete(null);
+      fetchAllData(); // Refresh all data
+      setIsDeleteDialogOpen(false);
+      setProgramToDelete(null);
     }).catch(err => alert('Failed to delete program.'));
   };
 
@@ -191,11 +191,11 @@ function OrganizationDashboard() {
 
   if (isLoading) {
     return (
-        <div className={styles.page}>
-            <Navbar title="Organization Master Dashboard" logoutPath="/org-login" />
-            <Loader />
-            <Footer />
-        </div>
+      <div className={styles.page}>
+        <Navbar title="Organization Master Dashboard" logoutPath="/org-login" />
+        <Loader />
+        <Footer />
+      </div>
     );
   }
 
@@ -266,20 +266,20 @@ function OrganizationDashboard() {
           </aside>
         </div>
       </main>
-      
+
       {/* Program Form Dialog */}
       {isFormOpen && (
-          <div className={styles.formDialog}>
-             <div className={styles.formDialogContent}>
-                <h2>{editingProgram ? 'Edit Program' : 'Create New Program'}</h2>
-                <ProgramForm 
-                    program={editingProgram}
-                    onSave={handleSaveProgram}
-                    onCancel={() => setIsFormOpen(false)}
-                    isSaving={isSaving}
-                />
-             </div>
+        <div className={styles.formDialog}>
+          <div className={styles.formDialogContent}>
+            <h2>{editingProgram ? 'Edit Program' : 'Create New Program'}</h2>
+            <ProgramForm
+              program={editingProgram}
+              onSave={handleSaveProgram}
+              onCancel={() => setIsFormOpen(false)}
+              isSaving={isSaving}
+            />
           </div>
+        </div>
       )}
 
       {/* Delete Confirmation Dialog */}

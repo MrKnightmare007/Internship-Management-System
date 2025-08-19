@@ -17,9 +17,9 @@ const PublicNavbar = () => {
           <NavLink to="/" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
             Home
           </NavLink>
-          {/* <NavLink to="/internships" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
+          <NavLink to="/internships" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
             Internships
-          </NavLink> */}
+          </NavLink>
           <div className={styles.navActionsMobile}>
             <NavLink to="/login" className={`${styles.actionBtn} ${styles.loginBtn}`}>Login</NavLink>
             <NavLink to="/register" className={`${styles.actionBtn} ${styles.registerBtn}`}>Register</NavLink>

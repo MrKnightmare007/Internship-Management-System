@@ -65,6 +65,55 @@ table tbody tr { transition: background-color 0.2s; }
 }
 .notificationForm textarea { min-height: 100px; }
 
+.formGrid {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.fileInputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fileInputGroup label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9em;
+}
+
+.fileInputGroup input[type="file"] {
+    padding: 8px;
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.fileInputGroup input[type="file"]:hover {
+    border-color: #3498db;
+}
+
+.createBtn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.createBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
 .errorText { color: #dc3545; font-size: 0.9em; margin-top: 8px; }
 .successText { color: #28a745; font-size: 0.9em; margin-top: 8px; }
 
@@ -77,4 +126,164 @@ table tbody tr { transition: background-color 0.2s; }
     .managementSection {
         grid-template-columns: 1fr;
     }
+}
+/* 
+Toaster Styles */
+.toaster {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 300px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.toaster.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.toaster.error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.toasterClose {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Admin Table Styles */
+.adminTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.adminRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.adminInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.adminInfo strong {
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.adminInfo span {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.adminActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editBtn, .deleteBtn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.editBtn {
+  background: #3498db;
+  color: white;
+}
+
+.editBtn:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.deleteBtn {
+  background: #e74c3c;
+  color: white;
+}
+
+.deleteBtn:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cancelBtn {
+  background: #6c757d;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelBtn:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design for new elements */
+@media (max-width: 768px) {
+  .adminRow {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .adminActions {
+    justify-content: center;
+  }
+  
+  .formActions {
+    flex-direction: column;
+  }
+  
+  .toaster {
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+  }
 }

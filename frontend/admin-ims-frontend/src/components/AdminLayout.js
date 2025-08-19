@@ -13,11 +13,11 @@ const AdminSidebar = () => (
       <NavLink to="/admin-dashboard" end className={({ isActive }) => isActive ? styles.active : ''}>
         <span>📊</span> Dashboard
       </NavLink>
-      <NavLink to="/admin-dashboard/programs" className={({ isActive }) => isActive ? styles.active : ''}>
-        <span>🗂️</span> Internship Programs
-      </NavLink>
       <NavLink to="/admin-dashboard/organizations" className={({ isActive }) => isActive ? styles.active : ''}>
         <span>🏢</span> Manage Organizations
+      </NavLink>
+      <NavLink to="/admin-dashboard/programs" className={({ isActive }) => isActive ? styles.active : ''}>
+        <span>🗂️</span> Internship Programs
       </NavLink>
       <NavLink to="/admin-dashboard/coordinators" className={({ isActive }) => isActive ? styles.active : ''}>
         <span>🧑‍💼</span> Manage Masters
