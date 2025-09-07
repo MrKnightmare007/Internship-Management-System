@@ -15,6 +15,7 @@ import ApplicantDashboard from './ApplicantDashboard';
 import Profile from './Profile'; // New Profile Page
 import BrowsePrograms from './BrowsePrograms'; // New Browse Page
 import MyInternships from './MyInternships'; // <-- This is the REAL component
+import MyApplications from './MyApplications'; // New Applications Page
 
 // Placeholder components for pages that need backend data
 // --- REMOVED THE DUPLICATE MyInternships DECLARATION ---
@@ -56,6 +57,7 @@ function MainSiteRoutes() {
             <Route index element={<ApplicantDashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="internships" element={<MyInternships />} />
+            <Route path="applications" element={<MyApplications />} />
             <Route path="tasks" element={<MyTasks />} />
             <Route path="browse" element={<BrowsePrograms />} />
             <Route path="certificates" element={<Certificates />} />

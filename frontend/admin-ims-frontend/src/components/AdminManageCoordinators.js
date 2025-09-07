@@ -206,62 +206,45 @@ const OrgAdminsManager = ({ orgId, orgName, onAdminCreated }) => {
                 </div>
             )}
             <div className={styles.createAdminForm}>
-                <h4>{editingAdmin ? 'Edit Coordinator:' : 'Create New Coordinator:'}</h4>
-                <div className={styles.formGrid}>
-                    <input
-                        type="text"
-                        placeholder="Username *"
-                        value={newAdminUsername}
-                        onChange={e => setNewAdminUsername(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="email"
-                        placeholder="Email *"
-                        value={newAdminEmail}
-                        onChange={e => setNewAdminEmail(e.target.value)}
-                        required
-                    />
-                    {!editingAdmin && (
-                        <>
+                <h4>Edit Coordinator:</h4>
+                {editingAdmin && (
+                    <>
+                        <div className={styles.formGrid}>
                             <input
                                 type="text"
-                                placeholder="Internship Name *"
-                                value={internshipName}
-                                onChange={e => setInternshipName(e.target.value)}
+                                placeholder="Username *"
+                                value={newAdminUsername}
+                                onChange={e => setNewAdminUsername(e.target.value)}
                                 required
                             />
-                            <div className={styles.fileInputGroup}>
-                                <label htmlFor="advertisementDoc">Advertisement Document (Optional):</label>
-                                <input
-                                    id="advertisementDoc"
-                                    type="file"
-                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                    onChange={e => setAdvertisementDocument(e.target.files[0])}
-                                />
-                            </div>
-                        </>
-                    )}
-                </div>
-                <div className={styles.formActions}>
-                    <Button
-                        onClick={editingAdmin ? handleUpdateAdmin : handleCreateAdmin}
-                        className={styles.createBtn}
-                        disabled={isCreating}
-                    >
-                        {isCreating ? 'Processing...' : (editingAdmin ? 'Update Coordinator' : 'Create Coordinator')}
-                    </Button>
-                    {editingAdmin && (
-                        <Button
-                            onClick={resetForm}
-                            className={styles.cancelBtn}
-                        >
-                            Cancel
-                        </Button>
-                    )}
-                </div>
-                {error && <p className={styles.errorText}>{error}</p>}
-                {message && <p className={styles.successText}>{message}</p>}
+                            <input
+                                type="email"
+                                placeholder="Email *"
+                                value={newAdminEmail}
+                                onChange={e => setNewAdminEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className={styles.formActions}>
+                            <Button
+                                onClick={handleUpdateAdmin}
+                                className={styles.createBtn}
+                                disabled={isCreating}
+                            >
+                                {isCreating ? 'Processing...' : 'Update Coordinator'}
+                            </Button>
+                            <Button
+                                onClick={resetForm}
+                                className={styles.cancelBtn}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                        {error && <p className={styles.errorText}>{error}</p>}
+                        {message && <p className={styles.successText}>{message}</p>}
+                    </>
+                )}
+                {!editingAdmin && <p>Select a coordinator from the list above to edit.</p>}
             </div>
 
             {toaster && (

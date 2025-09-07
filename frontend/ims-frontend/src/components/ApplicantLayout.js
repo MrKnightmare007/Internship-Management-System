@@ -17,6 +17,9 @@ const ApplicantSidebar = ({ isOpen }) => (
       <NavLink to="/applicant-dashboard/internships" className={({ isActive }) => isActive ? styles.active : ''}>
         <span>🎯</span> My Internships
       </NavLink>
+      <NavLink to="/applicant-dashboard/applications" className={({ isActive }) => isActive ? styles.active : ''}>
+        <span>📋</span> My Applications
+      </NavLink>
       <NavLink to="/applicant-dashboard/tasks" className={({ isActive }) => isActive ? styles.active : ''}>
         <span>📝</span> My Tasks
       </NavLink>

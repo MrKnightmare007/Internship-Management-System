@@ -45,6 +45,9 @@ public class InternshipApplication {
     @Column(name = "university_reg_no")
     private String universityRegNo;
 
+    @Column(name = "university_roll_no")
+    private String universityRollNo;
+
     @Column(name = "current_course")
     private String currentCourse;
 
@@ -53,6 +56,19 @@ public class InternshipApplication {
 
     @Column(name = "academic_details", columnDefinition = "TEXT")
     private String academicDetails; // Storing the academic records array as a JSON string
+
+    // Document fields
+    @Column(name = "aadhar_card_path")
+    private String aadharCardPath;
+
+    @Column(name = "class_x_marksheet_path")
+    private String classXMarksheetPath;
+
+    @Column(name = "class_xii_marksheet_path")
+    private String classXIIMarksheetPath;
+
+    @Column(name = "cover_letter_path")
+    private String coverLetterPath;
 
     @Column(name = "application_status", nullable = false)
     private String status;
@@ -104,12 +120,22 @@ public class InternshipApplication {
     public void setUniversityName(String universityName) { this.universityName = universityName; }
     public String getUniversityRegNo() { return universityRegNo; }
     public void setUniversityRegNo(String universityRegNo) { this.universityRegNo = universityRegNo; }
+    public String getUniversityRollNo() { return universityRollNo; }
+    public void setUniversityRollNo(String universityRollNo) { this.universityRollNo = universityRollNo; }
     public String getCurrentCourse() { return currentCourse; }
     public void setCurrentCourse(String currentCourse) { this.currentCourse = currentCourse; }
     public String getCurrentSemester() { return currentSemester; }
     public void setCurrentSemester(String currentSemester) { this.currentSemester = currentSemester; }
     public String getAcademicDetails() { return academicDetails; }
     public void setAcademicDetails(String academicDetails) { this.academicDetails = academicDetails; }
+    public String getAadharCardPath() { return aadharCardPath; }
+    public void setAadharCardPath(String aadharCardPath) { this.aadharCardPath = aadharCardPath; }
+    public String getClassXMarksheetPath() { return classXMarksheetPath; }
+    public void setClassXMarksheetPath(String classXMarksheetPath) { this.classXMarksheetPath = classXMarksheetPath; }
+    public String getClassXIIMarksheetPath() { return classXIIMarksheetPath; }
+    public void setClassXIIMarksheetPath(String classXIIMarksheetPath) { this.classXIIMarksheetPath = classXIIMarksheetPath; }
+    public String getCoverLetterPath() { return coverLetterPath; }
+    public void setCoverLetterPath(String coverLetterPath) { this.coverLetterPath = coverLetterPath; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getApplicationDate() { return applicationDate; }

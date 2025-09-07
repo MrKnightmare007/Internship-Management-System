@@ -1,6 +1,7 @@
 // frontend/ims-frontend/src/components/ApplicationForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 // The component now accepts 'program' and 'onClose' as props
 function ApplicationForm({ program, onClose }) {
@@ -11,7 +12,7 @@ function ApplicationForm({ program, onClose }) {
         fullName: '',
         collegeNameAddress: '',
         universityName: '',
-        universityRegNo: '',
+        universityRollNo: '',
         courseStream: '',
         currentSemester: '',
         email: '',
@@ -24,6 +25,16 @@ function ApplicationForm({ program, onClose }) {
     const [academicRecords, setAcademicRecords] = useState([
         { exam: '', school: '', subjects: '', year: '', percentage: '' }
     ]);
+
+    // State for document uploads
+    const [documents, setDocuments] = useState({
+        aadharCard: null,
+        classXMarksheet: null,
+        classXIIMarksheet: null,
+        coverLetter: null
+    });
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handlePersonalChange = (e) => {
         const { name, value } = e.target;
@@ -47,12 +58,54 @@ function ApplicationForm({ program, onClose }) {
         }
     };
 
-    // The submit handler now shows an alert and calls the onClose function.
-    const handleSubmit = (e) => {
+    const handleFileChange = (documentType, file) => {
+        setDocuments(prev => ({
+            ...prev,
+            [documentType]: file
+        }));
+    };
+
+
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert('Application Submitted!');
-        onClose(); // Close the modal
-        navigate('/applicant-dashboard'); // Stay on the dashboard
+        setIsSubmitting(true);
+        
+        try {
+            const formData = new FormData();
+            formData.append('programId', program.intProgId);
+            
+            // Prepare form data object
+            const applicationData = {
+                ...personalDetails,
+                academicRecords: academicRecords
+            };
+            formData.append('formData', JSON.stringify(applicationData));
+            
+            // Append documents
+            if (documents.aadharCard) {
+                formData.append('aadharCard', documents.aadharCard);
+            }
+            if (documents.classXMarksheet) {
+                formData.append('classXMarksheet', documents.classXMarksheet);
+            }
+            if (documents.classXIIMarksheet) {
+                formData.append('classXIIMarksheet', documents.classXIIMarksheet);
+            }
+            if (documents.coverLetter) {
+                formData.append('coverLetter', documents.coverLetter);
+            }
+            
+            await api.post('/applications', formData);
+            alert('Application submitted successfully!');
+            onClose();
+            navigate('/applicant-dashboard');
+        } catch (error) {
+            console.error('Error submitting application:', error);
+            alert('Error submitting application. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -71,8 +124,8 @@ function ApplicationForm({ program, onClose }) {
                         <textarea name="collegeNameAddress" value={personalDetails.collegeNameAddress} onChange={handlePersonalChange} required />
                         <label>Affiliating University Name</label>
                         <input type="text" name="universityName" value={personalDetails.universityName} onChange={handlePersonalChange} required />
-                        <label>University Registration No.</label>
-                        <input type="text" name="universityRegNo" value={personalDetails.universityRegNo} onChange={handlePersonalChange} required />
+                        <label>University Roll No.</label>
+                        <input type="text" name="universityRollNo" value={personalDetails.universityRollNo} onChange={handlePersonalChange} required />
                         <label>Currently Enrolled In (Course Name with Stream)</label>
                         <input type="text" name="courseStream" value={personalDetails.courseStream} onChange={handlePersonalChange} required />
                         <label>Current Semester</label>
@@ -117,11 +170,92 @@ function ApplicationForm({ program, onClose }) {
                         </table>
                         <button type="button" onClick={addAcademicRecord} style={{ marginTop: '10px' }}>Add Qualification</button>
                     </fieldset>
+
+                    <fieldset style={styles.fieldset}>
+                        <legend>C. Document Uploads</legend>
+                        
+                        <div style={styles.documentUpload}>
+                            <label><span style={{color: 'red'}}>*</span> Aadhar Card:</label>
+                            <input
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => handleFileChange('aadharCard', e.target.files[0])}
+                                required
+                            />
+                            {documents.aadharCard && (
+                                <div style={styles.selectedFile}>
+                                    ✓ {documents.aadharCard.name}
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={styles.documentUpload}>
+                            <label><span style={{color: 'red'}}>*</span> Class X Marksheet:</label>
+                            <input
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => handleFileChange('classXMarksheet', e.target.files[0])}
+                                required
+                            />
+                            {documents.classXMarksheet && (
+                                <div style={styles.selectedFile}>
+                                    ✓ {documents.classXMarksheet.name}
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={styles.documentUpload}>
+                            <label><span style={{color: 'red'}}>*</span> Class XII Marksheet:</label>
+                            <input
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={(e) => handleFileChange('classXIIMarksheet', e.target.files[0])}
+                                required
+                            />
+                            {documents.classXIIMarksheet && (
+                                <div style={styles.selectedFile}>
+                                    ✓ {documents.classXIIMarksheet.name}
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={styles.documentUpload}>
+                            <label>Cover Letter (Optional):</label>
+                            <input
+                                type="file"
+                                accept=".pdf,.doc,.docx"
+                                onChange={(e) => handleFileChange('coverLetter', e.target.files[0])}
+                            />
+                            {documents.coverLetter && (
+                                <div style={styles.selectedFile}>
+                                    ✓ {documents.coverLetter.name}
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={styles.uploadNote}>
+                            <p><strong>Note:</strong> Please ensure all documents are clear and readable. Accepted formats: PDF, DOC, DOCX, JPG, PNG. Maximum file size: 5MB per file.</p>
+                        </div>
+                    </fieldset>
                     
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                         <button type="button" onClick={onClose}>Cancel</button>
-                        <button type="submit">Submit Application</button>
+                        <button 
+                            type="submit" 
+                            disabled={isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet}
+                            style={{
+                                opacity: (isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) ? 0.6 : 1,
+                                cursor: (isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                        </button>
                     </div>
+                    {(!documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) && (
+                        <p style={{ color: 'red', fontSize: '0.9em', textAlign: 'center', marginTop: '10px' }}>
+                            Please upload required documents (Aadhar Card, Class X Marksheet, Class XII Marksheet) to submit your application.
+                        </p>
+                    )}
                 </form>
             </div>
         </div>
@@ -156,6 +290,48 @@ const styles = {
         border: '1px solid #ccc',
         padding: '15px',
         borderRadius: '4px'
+    },
+    documentUpload: {
+        marginBottom: '15px'
+    },
+    selectedFile: {
+        padding: '5px 10px',
+        backgroundColor: '#dcfce7',
+        color: '#166534',
+        borderRadius: '4px',
+        fontSize: '0.9em',
+        marginTop: '5px'
+    },
+    additionalFiles: {
+        marginTop: '10px'
+    },
+    additionalFile: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '5px 10px',
+        backgroundColor: '#dcfce7',
+        color: '#166534',
+        borderRadius: '4px',
+        fontSize: '0.9em',
+        marginBottom: '5px'
+    },
+    removeButton: {
+        background: 'none',
+        border: 'none',
+        color: '#dc2626',
+        fontSize: '1.2em',
+        cursor: 'pointer',
+        padding: '0 5px'
+    },
+    uploadNote: {
+        padding: '10px',
+        backgroundColor: '#fffbeb',
+        border: '1px solid #fbbf24',
+        borderRadius: '4px',
+        marginTop: '15px',
+        fontSize: '0.9em',
+        color: '#92400e'
     }
 };
 

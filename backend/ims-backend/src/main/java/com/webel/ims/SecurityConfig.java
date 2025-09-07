@@ -72,6 +72,9 @@ public class SecurityConfig {
 
                         // Allow public GET requests for organizations and programs
                         .requestMatchers(HttpMethod.GET, "/api/organizations", "/api/programs/public-list").permitAll()
+                        
+                        // Allow test upload endpoint (remove in production)
+                        .requestMatchers("/api/applications/test-upload").permitAll()
 
                         // --- ADD THIS LINE ---
                         // Allow UptimeRobot to make HEAD requests to keep the server alive

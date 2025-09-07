@@ -29,6 +29,9 @@ public class OrganizationMaster {
 
     @Column(name = "org_status", nullable = false)
     private String orgStatus;
+    
+    @Column(name = "org_abbreviation")
+    private String orgAbbreviation;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -105,6 +108,14 @@ public class OrganizationMaster {
 
     public void setOrgStatus(String orgStatus) {
         this.orgStatus = orgStatus;
+    }
+    
+    public String getOrgAbbreviation() {
+        return orgAbbreviation;
+    }
+
+    public void setOrgAbbreviation(String orgAbbreviation) {
+        this.orgAbbreviation = orgAbbreviation;
     }
 
     public LocalDateTime getCreatedAt() {

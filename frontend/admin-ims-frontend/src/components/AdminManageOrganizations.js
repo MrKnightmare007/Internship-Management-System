@@ -17,8 +17,24 @@ const AdminManageOrganizations = () => {
     const [orgToEdit, setOrgToEdit] = useState(null);
     const [orgToDelete, setOrgToDelete] = useState(null);
     
-    const initialOrgState = { orgName: '', orgAddress: '', orgContactEmail: '', orgContactPhone: '', orgWebsite: '', orgStatus: 'ACTIVE' };
+    const initialOrgState = {
+        orgName: '',
+        orgAbbreviation: '', // New field for organization abbreviation
+        orgAddress: '',
+        orgContactEmail: '',
+        orgContactPhone: '',
+        orgWebsite: '',
+        orgStatus: 'ACTIVE',
+        coordinatorUsername: '',
+        coordinatorEmail: '',
+        coordinatorPassword: '',
+        coordinatorPhone: '',
+        coordinatorRole: 'COORDINATOR',
+        internshipName: '',
+    };
     const [formOrg, setFormOrg] = useState(initialOrgState);
+    const [coordinatorFile, setCoordinatorFile] = useState(null);
+    const [showCoordinatorSection, setShowCoordinatorSection] = useState(true);
 
     const fetchOrgs = () => {
         setIsLoading(true);
@@ -54,28 +70,72 @@ const AdminManageOrganizations = () => {
         setFormOrg({ ...formOrg, [name]: value });
     };
 
-    const handleFormSubmit = () => {
-        const apiCall = orgToEdit
-            ? api.patch(`/organizations/${orgToEdit.orgId}`, formOrg)
-            : api.post('/organizations', formOrg);
-
-        apiCall.then(() => {
+    const handleFormSubmit = async () => {
+        try {
+            // First create or update the organization
+            const orgResponse = orgToEdit
+                ? await api.patch(`/organizations/${orgToEdit.orgId}`, {
+                    orgName: formOrg.orgName,
+                    orgAddress: formOrg.orgAddress,
+                    orgContactEmail: formOrg.orgContactEmail,
+                    orgContactPhone: formOrg.orgContactPhone,
+                    orgWebsite: formOrg.orgWebsite,
+                    orgStatus: formOrg.orgStatus
+                })
+                : await api.post('/organizations', {
+                    orgName: formOrg.orgName,
+                    orgAddress: formOrg.orgAddress,
+                    orgContactEmail: formOrg.orgContactEmail,
+                    orgContactPhone: formOrg.orgContactPhone,
+                    orgWebsite: formOrg.orgWebsite,
+                    orgStatus: formOrg.orgStatus,
+                    orgAbbreviation: formOrg.orgAbbreviation // Include abbreviation
+                });
+            
+            // If creating a new organization and coordinator section is enabled
+            if (!orgToEdit && showCoordinatorSection && formOrg.coordinatorUsername && formOrg.coordinatorEmail && formOrg.coordinatorPassword) {
+                const orgId = orgResponse.data.orgId;
+                const formData = new FormData();
+                // Append organization abbreviation to username
+                formData.append('username', `${formOrg.coordinatorUsername}@${formOrg.orgAbbreviation}`);
+                formData.append('email', formOrg.coordinatorEmail);
+                formData.append('password', formOrg.coordinatorPassword);
+                formData.append('phone', formOrg.coordinatorPhone);
+                formData.append('role', formOrg.coordinatorRole);
+                formData.append('orgId', orgId);
+                formData.append('internshipName', formOrg.internshipName);
+                formData.append('orgName', formOrg.orgName);
+                
+                if (coordinatorFile) {
+                    formData.append('advertisementDocument', coordinatorFile);
+                }
+                
+                await api.post('/organization-admins/create', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+            }
+            
             fetchOrgs();
             setIsFormOpen(false);
-        }).catch(error => console.error('Error saving organization:', error));
+        } catch (error) {
+            console.error('Error saving organization or coordinator:', error);
+            alert('An error occurred while saving. Please try again.');
+        }
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (!orgToDelete) return;
-        api.delete(`/organizations/${orgToDelete.orgId}`).then(() => {
+        try {
+            await api.delete(`/organizations/${orgToDelete.orgId}`);
             fetchOrgs();
             setIsDeleteDialogOpen(false);
             setOrgToDelete(null);
-        }).catch(error => {
+            alert('Organization deleted successfully');
+        } catch (error) {
             console.error('Error deleting organization:', error);
-            alert('Failed to delete organization.');
+            alert('Failed to delete organization. ' + (error.response?.data?.message || ''));
             setIsDeleteDialogOpen(false);
-        });
+        }
     };
 
     if (isLoading) return <Loader />;
@@ -117,20 +177,99 @@ const AdminManageOrganizations = () => {
                 onClose={() => setIsFormOpen(false)}
                 title={orgToEdit ? 'Edit Organization' : 'Add New Organization'}
                 onConfirm={handleFormSubmit}
-                confirmText="Save" // Use the new prop for the button text
-                confirmVariant="primary" // Use the new prop for the button style
+                confirmText="Save" 
+                confirmVariant="primary"
             >
-                <div className={styles.formGrid}>
-                    <input name="orgName" placeholder="Name" value={formOrg.orgName} onChange={handleFormChange} />
-                    <input name="orgAddress" placeholder="Address" value={formOrg.orgAddress} onChange={handleFormChange} />
-                    <input name="orgContactEmail" placeholder="Contact Email" value={formOrg.orgContactEmail} onChange={handleFormChange} />
-                    <input name="orgContactPhone" placeholder="Contact Phone" value={formOrg.orgContactPhone} onChange={handleFormChange} />
-                    <input name="orgWebsite" placeholder="Website" value={formOrg.orgWebsite} onChange={handleFormChange} />
-                    <select name="orgStatus" value={formOrg.orgStatus} onChange={handleFormChange}>
-                        <option value="ACTIVE">ACTIVE</option>
-                        <option value="INACTIVE">INACTIVE</option>
-                    </select>
+                <div className={styles.formSection}>
+                    <h3>Organization Details</h3>
+                    <div className={styles.formGrid}>
+                        <input name="orgName" placeholder="Name *" value={formOrg.orgName} onChange={handleFormChange} required />
+                        <input name="orgAddress" placeholder="Address" value={formOrg.orgAddress} onChange={handleFormChange} />
+                        <input name="orgContactEmail" placeholder="Contact Email *" value={formOrg.orgContactEmail} onChange={handleFormChange} required />
+                        <input name="orgContactPhone" placeholder="Contact Phone" value={formOrg.orgContactPhone} onChange={handleFormChange} />
+                        <input name="orgAbbreviation" placeholder="Organization Abbreviation *" value={formOrg.orgAbbreviation} onChange={handleFormChange} required={!orgToEdit} />
+                        <input name="orgWebsite" placeholder="Website" value={formOrg.orgWebsite} onChange={handleFormChange} />
+                        <select name="orgStatus" value={formOrg.orgStatus} onChange={handleFormChange}>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="INACTIVE">INACTIVE</option>
+                        </select>
+                    </div>
                 </div>
+                
+                {!orgToEdit && (
+                    <div className={styles.formSection}>
+                        <div className={styles.sectionHeader}>
+                            <h3>Coordinator Details</h3>
+                            <label className={styles.toggleSwitch}>
+                                <input 
+                                    type="checkbox" 
+                                    checked={showCoordinatorSection} 
+                                    onChange={() => setShowCoordinatorSection(!showCoordinatorSection)}
+                                />
+                                <span className={styles.slider}></span>
+                                <span className={styles.toggleLabel}>{showCoordinatorSection ? 'Enabled' : 'Disabled'}</span>
+                            </label>
+                        </div>
+                        <p className={styles.formNote}>Create a coordinator for this organization</p>
+                        
+                        {showCoordinatorSection && (
+                            <div className={styles.formGrid}>
+                                <input 
+                                    name="coordinatorUsername" 
+                                    placeholder="Coordinator Username *" 
+                                    value={formOrg.coordinatorUsername} 
+                                    onChange={handleFormChange}
+                                    required={showCoordinatorSection} 
+                                />
+                                <input 
+                                    name="coordinatorEmail" 
+                                    placeholder="Coordinator Email *" 
+                                    value={formOrg.coordinatorEmail} 
+                                    onChange={handleFormChange}
+                                    required={showCoordinatorSection} 
+                                />
+                                <input 
+                                    type="password"
+                                    name="coordinatorPassword" 
+                                    placeholder="Coordinator Password *" 
+                                    value={formOrg.coordinatorPassword} 
+                                    onChange={handleFormChange}
+                                    required={showCoordinatorSection} 
+                                />
+                                <input 
+                                    name="coordinatorPhone" 
+                                    placeholder="Coordinator Phone" 
+                                    value={formOrg.coordinatorPhone} 
+                                    onChange={handleFormChange}
+                                />
+                                <select 
+                                    name="coordinatorRole" 
+                                    value={formOrg.coordinatorRole} 
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="COORDINATOR">Coordinator</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                                <input 
+                                    name="internshipName" 
+                                    placeholder="Internship Name *" 
+                                    value={formOrg.internshipName} 
+                                    onChange={handleFormChange}
+                                    required={showCoordinatorSection} 
+                                />
+                                <div className={styles.fileInputGroup}>
+                                    <label htmlFor="advertisementDoc">Advertisement Document (Optional):</label>
+                                    <input
+                                        id="advertisementDoc"
+                                        type="file"
+                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                        onChange={e => setCoordinatorFile(e.target.files[0])}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </Dialog>
 
            {/* --- THIS IS THE UPDATED DIALOG FOR DELETION --- */}

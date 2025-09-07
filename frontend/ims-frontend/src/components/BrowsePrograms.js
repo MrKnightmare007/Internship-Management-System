@@ -13,7 +13,6 @@ const ApplicationForm = ({ onApply, program }) => {
         name: '',
         collegeNameAddress: '',
         universityName: '',
-        universityRegNo: '',
         courseStream: '',
         currentSemester: '',
         email: '',
@@ -26,12 +25,13 @@ const ApplicationForm = ({ onApply, program }) => {
         { exam: '', board: '', subjects: '', year: '', percentage: '' }
     ]);
 
-    // State to track if files are selected (simplified for this example)
+    // State to track if files are selected
     const [files, setFiles] = useState({
-        registration: null,
+        resume: null,
+        coverLetter: null,
+        academicTranscript: null,
         classX: null,
-        classXII: null,
-        ageProof: null
+        classXII: null
     });
 
     const [isFormValid, setIsFormValid] = useState(false);
@@ -49,10 +49,8 @@ const ApplicationForm = ({ onApply, program }) => {
                     if (record[key].trim() === '') return false;
                 }
             }
-            // Check if all files are selected
-            for (const key in files) {
-                if (files[key] === null) return false;
-            }
+            // Check if required files are selected (resume and academicTranscript are required)
+            if (!files.resume || !files.academicTranscript) return false;
             return true;
         };
         setIsFormValid(validateForm());
@@ -82,9 +80,8 @@ const ApplicationForm = ({ onApply, program }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Here you would typically package the form data and files for submission
-        // For now, it just calls the onApply function
-        onApply(formData, academicRecords);
+        // Package form data and files for submission
+        onApply(formData, academicRecords, files);
     }
 
     return (
@@ -105,7 +102,10 @@ const ApplicationForm = ({ onApply, program }) => {
                 <div className={styles.formGrid}>
                     <input name="collegeNameAddress" placeholder="Name & Address of College/Institute" className={styles.fullWidth} onChange={handleInputChange} required />
                     <input name="universityName" placeholder="Affiliating University Name" onChange={handleInputChange} required />
-                    <input name="universityRegNo" placeholder="University Registration No." onChange={handleInputChange} required />
+                    <div className={styles.inputGroup}>
+                        <label><span style={{color: 'red'}}>*</span> Resume/CV Upload</label>
+                        <input type="file" name="resume" accept=".pdf,.doc,.docx" onChange={handleFileChange} required />
+                    </div>
                     <input name="courseStream" placeholder="Course Name with Stream" onChange={handleInputChange} required />
                     <input name="currentSemester" placeholder="Current Semester" onChange={handleInputChange} required />
                     <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
@@ -131,12 +131,12 @@ const ApplicationForm = ({ onApply, program }) => {
 
             <fieldset>
                 <legend>Document Uploads</legend>
-                <p className={styles.uploadInstructions}>Please attach University Registration, Class X & XII Marksheets, and a valid age proof.</p>
+                <p className={styles.uploadInstructions}>Please attach your academic transcripts and additional documents.</p>
                 <div className={styles.formGrid}>
-                    <div className={styles.inputGroup}><label>University Registration Certificate</label><input type="file" name="registration" onChange={handleFileChange} required /></div>
-                    <div className={styles.inputGroup}><label>Class X Marksheet/Certificate</label><input type="file" name="classX" onChange={handleFileChange} required /></div>
-                    <div className={styles.inputGroup}><label>Class XII Marksheet/Certificate</label><input type="file" name="classXII" onChange={handleFileChange} required /></div>
-                    <div className={styles.inputGroup}><label>Valid Age Proof</label><input type="file" name="ageProof" onChange={handleFileChange} required /></div>
+                    <div className={styles.inputGroup}><label>Cover Letter (Optional)</label><input type="file" name="coverLetter" accept=".pdf,.doc,.docx" onChange={handleFileChange} /></div>
+                    <div className={styles.inputGroup}><label><span style={{color: 'red'}}>*</span> Academic Transcript</label><input type="file" name="academicTranscript" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={handleFileChange} required /></div>
+                    <div className={styles.inputGroup}><label>Class X Marksheet/Certificate</label><input type="file" name="classX" onChange={handleFileChange} /></div>
+                    <div className={styles.inputGroup}><label>Class XII Marksheet/Certificate</label><input type="file" name="classXII" onChange={handleFileChange} /></div>
                 </div>
             </fieldset>
 
@@ -289,13 +289,33 @@ const BrowsePrograms = () => {
         setIsApplyDialogOpen(true);
     };
 
-    const handleApplyConfirm = (formData, academicRecords) => {
-        const payload = {
-            programId: selectedProgram.intProgId,
-            formData: { ...formData, academicRecords }
+    const handleApplyConfirm = (formData, academicRecords, files) => {
+        const formDataToSend = new FormData();
+        formDataToSend.append('programId', selectedProgram.intProgId);
+        
+        // Prepare application data
+        const applicationData = {
+            fullName: formData.name,
+            collegeNameAddress: formData.collegeNameAddress,
+            universityName: formData.universityName,
+            courseStream: formData.courseStream,
+            currentSemester: formData.currentSemester,
+            email: formData.email,
+            mobile: formData.mobile,
+            address: formData.address,
+            dob: formData.dob,
+            academicRecords: academicRecords
         };
+        formDataToSend.append('formData', JSON.stringify(applicationData));
+        
+        // Append files
+        if (files.resume) formDataToSend.append('resume', files.resume);
+        if (files.coverLetter) formDataToSend.append('coverLetter', files.coverLetter);
+        if (files.academicTranscript) formDataToSend.append('academicTranscript', files.academicTranscript);
+        if (files.classX) formDataToSend.append('additionalDocuments', files.classX);
+        if (files.classXII) formDataToSend.append('additionalDocuments', files.classXII);
 
-        api.post('/applications', payload)
+        api.post('/applications', formDataToSend)
             .then(response => {
                 alert('Application submitted successfully!');
                 setAppliedProgramIds(prevIds => new Set(prevIds).add(selectedProgram.intProgId));

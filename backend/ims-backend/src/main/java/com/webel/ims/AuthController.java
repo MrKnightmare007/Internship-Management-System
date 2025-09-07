@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import com.webel.ims.OrganizationMaster;
+import com.webel.ims.OrganizationRepository;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +38,8 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private OrganizationRepository organizationRepository;
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -118,14 +123,39 @@ public class AuthController {
         // ... existing organization master login logic ...
         String username = credentials.get("username");
         String password = credentials.get("password");
-        Integer orgId = Integer.parseInt(credentials.get("orgId"));
-        Optional<User> userOptional = userRepository.findByUsername(username);
+        String orgAbbreviation = credentials.get("orgAbbreviation");
+        
+        // Handle both frontend format (separate username and orgAbbreviation) and direct format (username@org)
+        String fullUsername;
+        if (orgAbbreviation != null && !orgAbbreviation.isEmpty()) {
+            // Frontend sends separate fields
+            fullUsername = username + "@" + orgAbbreviation;
+        } else {
+            // Direct format or legacy format
+            fullUsername = username;
+            // Extract organization abbreviation from username (e.g., "username@org_abbr")
+            String[] parts = username.split("@");
+            if (parts.length != 2) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid username format. Expected username@org_abbreviation.");
+            }
+            orgAbbreviation = parts[1];
+        }
+        
+        Optional<User> userOptional = userRepository.findByUsername(fullUsername);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            if (passwordEncoder.matches(password, user.getUserPassword()) && "ORGANIZATION_MASTER".equals(user.getUserType()) && user.getOrganization() != null && user.getOrganization().getOrgId().equals(orgId)) {
+
+            // Find organization by abbreviation
+            Optional<OrganizationMaster> organizationOptional = organizationRepository.findByOrgAbbreviation(orgAbbreviation);
+
+            if (passwordEncoder.matches(password, user.getUserPassword()) &&
+                "ORGANIZATION_MASTER".equals(user.getUserType()) &&
+                user.getOrganization() != null &&
+                organizationOptional.isPresent() &&
+                user.getOrganization().getOrgId().equals(organizationOptional.get().getOrgId())) {
                 String otp = String.format("%06d", new Random().nextInt(999999));
-                otpStorage.put(username, otp);
-                otpExpiry.put(username, System.currentTimeMillis() + OTP_VALID_DURATION_MS);
+                otpStorage.put(fullUsername, otp);
+                otpExpiry.put(fullUsername, System.currentTimeMillis() + OTP_VALID_DURATION_MS);
                 try {
                     emailService.sendEmail(user.getUserEmail(), "Your IMS Login Verification Code", "Your One-Time Password is: " + otp);
                     return ResponseEntity.ok(Map.of("message", "Verification code sent to your email."));

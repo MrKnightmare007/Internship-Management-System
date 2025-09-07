@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Document Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .preview-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .document-actions button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .preview-btn {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .download-btn {
+            background-color: #10b981;
+            color: white;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            width: 90%;
+            height: 90%;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        iframe, img {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Document Preview Test</h1>
+    
+    <div class="preview-container">
+        <h3>Sample Documents</h3>
+        
+        <div class="document-item">
+            <div>
+                <span>📄</span>
+                <strong>Sample Resume.pdf</strong>
+            </div>
+            <div class="document-actions">
+                <button class="preview-btn" onclick="previewDocument('sample-resume.pdf', 'Resume')">Preview</button>
+                <button class="download-btn" onclick="downloadDocument('sample-resume.pdf')">Download</button>
+            </div>
+        </div>
+        
+        <div class="document-item">
+            <div>
+                <span>🎓</span>
+                <strong>Academic Transcript.pdf</strong>
+            </div>
+            <div class="document-actions">
+                <button class="preview-btn" onclick="previewDocument('sample-transcript.pdf', 'Academic Transcript')">Preview</button>
+                <button class="download-btn" onclick="downloadDocument('sample-transcript.pdf')">Download</button>
+            </div>
+        </div>
+        
+        <div class="document-item">
+            <div>
+                <span>📝</span>
+                <strong>Cover Letter.docx</strong>
+            </div>
+            <div class="document-actions">
+                <button class="preview-btn" onclick="previewDocument('sample-cover.docx', 'Cover Letter')">Preview</button>
+                <button class="download-btn" onclick="downloadDocument('sample-cover.docx')">Download</button>
+            </div>
+        </div>
+        
+        <div class="document-item">
+            <div>
+                <span>🖼️</span>
+                <strong>ID Photo.jpg</strong>
+            </div>
+            <div class="document-actions">
+                <button class="preview-btn" onclick="previewDocument('sample-photo.jpg', 'ID Photo')">Preview</button>
+                <button class="download-btn" onclick="downloadDocument('sample-photo.jpg')">Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="documentTitle">Document Preview</h3>
+                <button class="close-btn" onclick="closePreview()">&times;</button>
+            </div>
+            <div class="modal-body" id="previewContent">
+                <!-- Document content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getFileType(filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            if (['pdf'].includes(extension)) return 'pdf';
+            if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) return 'image';
+            if (['doc', 'docx'].includes(extension)) return 'document';
+            return 'unknown';
+        }
+
+        function previewDocument(filename, title) {
+            const modal = document.getElementById('previewModal');
+            const titleElement = document.getElementById('documentTitle');
+            const contentElement = document.getElementById('previewContent');
+            
+            titleElement.textContent = title;
+            
+            const fileType = getFileType(filename);
+            const filePath = `http://localhost:8080/uploads/applications/${filename}`;
+            
+            let content = '';
+            
+            if (fileType === 'pdf') {
+                content = `<iframe src="${filePath}" style="width: 100%; height: 100%;"></iframe>`;
+            } else if (fileType === 'image') {
+                content = `<img src="${filePath}" alt="${title}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+            } else if (fileType === 'document') {
+                content = `
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">📄</div>
+                        <p>Preview not available for this document type.</p>
+                        <p>Click the button below to open or download the document.</p>
+                        <button onclick="window.open('${filePath}', '_blank')" style="padding: 10px 20px; background-color: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Open Document
+                        </button>
+                    </div>
+                `;
+            } else {
+                content = `
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">❓</div>
+                        <p>Preview not available for this file type.</p>
+                        <button onclick="window.open('${filePath}', '_blank')" style="padding: 10px 20px; background-color: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Download File
+                        </button>
+                    </div>
+                `;
+            }
+            
+            contentElement.innerHTML = content;
+            modal.style.display = 'block';
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
+        function downloadDocument(filename) {
+            const filePath = `http://localhost:8080/uploads/applications/${filename}`;
+            window.open(filePath, '_blank');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('previewModal');
+            if (event.target === modal) {
+                closePreview();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Form Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .required {
+            color: red;
+        }
+        .file-info {
+            margin-top: 5px;
+            padding: 5px;
+            background-color: #e8f5e8;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Internship Application Form - Updated</h1>
+    
+    <form id="applicationForm">
+        <div class="form-section">
+            <h3>A. Personal Details</h3>
+            
+            <div class="form-group">
+                <label for="fullName">Name (In CAPS) <span class="required">*</span></label>
+                <input type="text" id="fullName" name="fullName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="collegeNameAddress">Name and Address of College/Institute/University <span class="required">*</span></label>
+                <textarea id="collegeNameAddress" name="collegeNameAddress" rows="3" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="universityName">Affiliating University Name <span class="required">*</span></label>
+                <input type="text" id="universityName" name="universityName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="universityRollNo">University Roll No. <span class="required">*</span></label>
+                <input type="text" id="universityRollNo" name="universityRollNo" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="courseStream">Currently Enrolled In (Course Name with Stream) <span class="required">*</span></label>
+                <input type="text" id="courseStream" name="courseStream" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="currentSemester">Current Semester <span class="required">*</span></label>
+                <input type="number" id="currentSemester" name="currentSemester" min="1" max="12" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email ID <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="mobile">Mobile No. <span class="required">*</span></label>
+                <input type="tel" id="mobile" name="mobile" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Address for Communication <span class="required">*</span></label>
+                <textarea id="address" name="address" rows="3" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="dob">Date of Birth <span class="required">*</span></label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>B. Document Uploads</h3>
+            
+            <div class="form-group">
+                <label for="aadharCard">Aadhar Card <span class="required">*</span></label>
+                <input type="file" id="aadharCard" name="aadharCard" accept=".pdf,.jpg,.jpeg,.png" required>
+                <div class="file-info">Accepted formats: PDF, JPG, PNG. Max size: 5MB</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="classXMarksheet">Class X Marksheet <span class="required">*</span></label>
+                <input type="file" id="classXMarksheet" name="classXMarksheet" accept=".pdf,.jpg,.jpeg,.png" required>
+                <div class="file-info">Accepted formats: PDF, JPG, PNG. Max size: 5MB</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="classXIIMarksheet">Class XII Marksheet <span class="required">*</span></label>
+                <input type="file" id="classXIIMarksheet" name="classXIIMarksheet" accept=".pdf,.jpg,.jpeg,.png" required>
+                <div class="file-info">Accepted formats: PDF, JPG, PNG. Max size: 5MB</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="coverLetter">Cover Letter (Optional)</label>
+                <input type="file" id="coverLetter" name="coverLetter" accept=".pdf,.doc,.docx">
+                <div class="file-info">Accepted formats: PDF, DOC, DOCX. Max size: 5MB</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <button type="submit" class="submit-btn" id="submitBtn">Submit Application</button>
+        </div>
+    </form>
+
+    <script>
+        document.getElementById('applicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const requiredFiles = ['aadharCard', 'classXMarksheet', 'classXIIMarksheet'];
+            
+            // Check if all required files are uploaded
+            let allFilesUploaded = true;
+            requiredFiles.forEach(fieldName => {
+                const fileInput = document.getElementById(fieldName);
+                if (!fileInput.files[0]) {
+                    allFilesUploaded = false;
+                    alert(`Please upload ${fieldName.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+                }
+            });
+            
+            if (allFilesUploaded) {
+                alert('Form validation passed! All required documents uploaded.');
+                console.log('Form data ready for submission:', formData);
+                
+                // Display uploaded files
+                console.log('Uploaded files:');
+                requiredFiles.forEach(fieldName => {
+                    const file = document.getElementById(fieldName).files[0];
+                    if (file) {
+                        console.log(`${fieldName}: ${file.name} (${file.size} bytes)`);
+                    }
+                });
+                
+                const coverLetter = document.getElementById('coverLetter').files[0];
+                if (coverLetter) {
+                    console.log(`coverLetter: ${coverLetter.name} (${coverLetter.size} bytes)`);
+                }
+            }
+        });
+        
+        // File size validation
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file && file.size > 5 * 1024 * 1024) { // 5MB
+                    alert('File size must be less than 5MB');
+                    this.value = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

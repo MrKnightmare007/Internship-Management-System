@@ -4,7 +4,6 @@ import api from '../api';
 import styles from './OrganizationAuth.module.css';
 import Card from './ui/Card';
 import Button from './ui/Button';
-import Loader from './ui/Loader';
 import EnhancedInput from './ui/EnhancedInput';
 import OTPInput from './ui/OTPInput';
 
@@ -15,36 +14,13 @@ function OrganizationLogin() {
     email: '',
     otp: '',
     newPassword: '',
-    confirmPassword: '',
-    selectedOrg: ''
+    confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [currentStep, setCurrentStep] = useState('login'); // login, forgotPassword, verifyOTP, resetPassword
-  const [organizations, setOrganizations] = useState([]);
-  const [isFetchingOrgs, setIsFetchingOrgs] = useState(true);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setIsFetchingOrgs(true);
-    api.get('/organizations')
-      .then(response => {
-        setOrganizations(response.data);
-        if (response.data.length > 0) {
-          setFormData(prev => ({
-            ...prev,
-            selectedOrg: response.data[0].orgId
-          }));
-        }
-        setIsFetchingOrgs(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch organizations", err);
-        setErrors({ general: "Could not load organization list. Please refresh." });
-        setIsFetchingOrgs(false);
-      });
-  }, []);
 
   const handleInputChange = (field) => (e) => {
     setFormData(prev => ({
@@ -77,7 +53,6 @@ function OrganizationLogin() {
     const newErrors = {};
     
     if (currentStep === 'login') {
-      if (!formData.selectedOrg) newErrors.selectedOrg = 'Please select an organization';
       if (!formData.username.trim()) newErrors.username = 'Username is required';
       if (!formData.password) newErrors.password = 'Password is required';
     } else if (currentStep === 'forgotPassword') {
@@ -102,10 +77,17 @@ function OrganizationLogin() {
 
     setIsLoading(true);
     try {
+      const [username, orgAbbreviation] = formData.username.split('@');
+      if (!username || !orgAbbreviation) {
+        setErrors({ username: 'Username must be in the format username@abbreviation' });
+        setIsLoading(false);
+        return;
+      }
+
       const response = await api.post('/auth/org-login', {
-        username: formData.username,
+        username: username,
         password: formData.password,
-        orgId: formData.selectedOrg
+        orgAbbreviation: orgAbbreviation
       });
       setMessage(response.data.message);
       setCurrentStep('verifyOTP');
@@ -182,8 +164,7 @@ function OrganizationLogin() {
           email: '',
           otp: '',
           newPassword: '',
-          confirmPassword: '',
-          selectedOrg: formData.selectedOrg
+          confirmPassword: ''
         });
         setMessage('');
       }, 2000);
@@ -196,25 +177,7 @@ function OrganizationLogin() {
 
   const renderLoginForm = () => (
     <form onSubmit={handleLogin} className={styles.form}>
-      <div className={styles.selectContainer}>
-        <label className={styles.selectLabel}>Organization</label>
-        {isFetchingOrgs ? (
-          <div className={styles.loaderContainer}><Loader /></div>
-        ) : (
-          <select 
-            className={`${styles.select} ${errors.selectedOrg ? styles.error : ''}`}
-            value={formData.selectedOrg} 
-            onChange={handleInputChange('selectedOrg')}
-            required
-          >
-            <option value="">-- Select Organization --</option>
-            {organizations.map(org => (
-              <option key={org.orgId} value={org.orgId}>{org.orgName}</option>
-            ))}
-          </select>
-        )}
-        {errors.selectedOrg && <span className={styles.errorText}>{errors.selectedOrg}</span>}
-      </div>
+
       
       <EnhancedInput
         type="text"
@@ -237,7 +200,7 @@ function OrganizationLogin() {
         showPasswordToggle
         required
       />
-      <Button type="submit" className={styles.submitButton} disabled={isLoading || isFetchingOrgs}>
+      <Button type="submit" className={styles.submitButton} disabled={isLoading}>
         {isLoading ? 'Logging in...' : 'Login'}
       </Button>
       <div className={styles.linkContainer}>
