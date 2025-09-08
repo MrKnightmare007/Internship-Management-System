@@ -12,15 +12,15 @@ public class InternshipApplication {
     @Column(name = "applicant_id")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User applicantUser; // Renamed for clarity
+    private User applicantUser;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prog_id", nullable = false)
     private InternshipProgram program;
 
-    // --- NEW FIELDS MATCHING YOUR DATABASE SCHEMA ---
+    // --- Form Fields ---
     @Column(name = "applicant_name", nullable = false)
     private String applicantName;
 
@@ -33,8 +33,17 @@ public class InternshipApplication {
     @Column(name = "applicant_phone")
     private String applicantPhone;
 
-    @Column(name = "communication_address", columnDefinition = "TEXT")
-    private String communicationAddress;
+    @Column(name = "current_address", columnDefinition = "TEXT")
+    private String currentAddress;
+
+    @Column(name = "permanent_address", columnDefinition = "TEXT")
+    private String permanentAddress;
+    
+    @Column(name = "city_of_domicile")
+    private String cityOfDomicile;
+
+    @Column(name = "state_of_domicile")
+    private String stateOfDomicile;
 
     @Column(name = "college_name_address", columnDefinition = "TEXT")
     private String collegeNameAddress;
@@ -55,21 +64,25 @@ public class InternshipApplication {
     private String currentSemester;
 
     @Column(name = "academic_details", columnDefinition = "TEXT")
-    private String academicDetails; // Storing the academic records array as a JSON string
+    private String academicDetails;
 
-    // Document fields
-    @Column(name = "aadhar_card_path")
-    private String aadharCardPath;
+    // --- Document Fields ---
+    @Column(name = "government_id_type")
+    private String governmentIdType;
 
+    @Column(name = "government_id_path")
+    private String governmentIdPath;
+
+    @Column(name = "cover_letter_path")
+    private String coverLetterPath;
+    
     @Column(name = "class_x_marksheet_path")
     private String classXMarksheetPath;
 
     @Column(name = "class_xii_marksheet_path")
     private String classXIIMarksheetPath;
 
-    @Column(name = "cover_letter_path")
-    private String coverLetterPath;
-
+    // --- Status and Timestamps ---
     @Column(name = "application_status", nullable = false)
     private String status;
 
@@ -95,9 +108,7 @@ public class InternshipApplication {
         updatedAt = LocalDateTime.now();
     }
     
-    // --- GETTERS AND SETTERS FOR ALL FIELDS ---
-    // (You can generate these in your IDE or write them manually)
-
+    // --- Getters and Setters ---
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public User getApplicantUser() { return applicantUser; }
@@ -112,8 +123,14 @@ public class InternshipApplication {
     public void setApplicantEmail(String applicantEmail) { this.applicantEmail = applicantEmail; }
     public String getApplicantPhone() { return applicantPhone; }
     public void setApplicantPhone(String applicantPhone) { this.applicantPhone = applicantPhone; }
-    public String getCommunicationAddress() { return communicationAddress; }
-    public void setCommunicationAddress(String communicationAddress) { this.communicationAddress = communicationAddress; }
+    public String getCurrentAddress() { return currentAddress; }
+    public void setCurrentAddress(String currentAddress) { this.currentAddress = currentAddress; }
+    public String getPermanentAddress() { return permanentAddress; }
+    public void setPermanentAddress(String permanentAddress) { this.permanentAddress = permanentAddress; }
+    public String getCityOfDomicile() { return cityOfDomicile; }
+    public void setCityOfDomicile(String cityOfDomicile) { this.cityOfDomicile = cityOfDomicile; }
+    public String getStateOfDomicile() { return stateOfDomicile; }
+    public void setStateOfDomicile(String stateOfDomicile) { this.stateOfDomicile = stateOfDomicile; }
     public String getCollegeNameAddress() { return collegeNameAddress; }
     public void setCollegeNameAddress(String collegeNameAddress) { this.collegeNameAddress = collegeNameAddress; }
     public String getUniversityName() { return universityName; }
@@ -128,14 +145,16 @@ public class InternshipApplication {
     public void setCurrentSemester(String currentSemester) { this.currentSemester = currentSemester; }
     public String getAcademicDetails() { return academicDetails; }
     public void setAcademicDetails(String academicDetails) { this.academicDetails = academicDetails; }
-    public String getAadharCardPath() { return aadharCardPath; }
-    public void setAadharCardPath(String aadharCardPath) { this.aadharCardPath = aadharCardPath; }
+    public String getGovernmentIdType() { return governmentIdType; }
+    public void setGovernmentIdType(String governmentIdType) { this.governmentIdType = governmentIdType; }
+    public String getGovernmentIdPath() { return governmentIdPath; }
+    public void setGovernmentIdPath(String governmentIdPath) { this.governmentIdPath = governmentIdPath; }
+    public String getCoverLetterPath() { return coverLetterPath; }
+    public void setCoverLetterPath(String coverLetterPath) { this.coverLetterPath = coverLetterPath; }
     public String getClassXMarksheetPath() { return classXMarksheetPath; }
     public void setClassXMarksheetPath(String classXMarksheetPath) { this.classXMarksheetPath = classXMarksheetPath; }
     public String getClassXIIMarksheetPath() { return classXIIMarksheetPath; }
     public void setClassXIIMarksheetPath(String classXIIMarksheetPath) { this.classXIIMarksheetPath = classXIIMarksheetPath; }
-    public String getCoverLetterPath() { return coverLetterPath; }
-    public void setCoverLetterPath(String coverLetterPath) { this.coverLetterPath = coverLetterPath; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getApplicationDate() { return applicationDate; }
