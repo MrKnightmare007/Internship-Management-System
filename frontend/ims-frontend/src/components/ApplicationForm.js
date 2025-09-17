@@ -1,338 +1,352 @@
 // frontend/ims-frontend/src/components/ApplicationForm.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api from '../api';
+import styles from './ApplicationForm.module.css';
 
-// The component now accepts 'program' and 'onClose' as props
-function ApplicationForm({ program, onClose }) {
-    const navigate = useNavigate();
+const ApplicationForm = ({ programId }) => {
+  const [formData, setFormData] = useState({
+    applicantName: '',
+    applicantEmail: '',
+    applicantPhone: '',
+    communicationAddress: '',
+    universityRollNo: '',
+    dob: '',
+    collegeNameAddress: '',
+    universityName: '',
+    currentCourse: '',
+    currentSemester: '',
+    cityOfDomicile: '',
+    stateOfDomicile: '',
+    governmentIdType: 'AADHAR_CARD',
+    academicDetails: JSON.stringify([]),
+  });
+  const [files, setFiles] = useState({
+    aadharCard: null,
+    classXMarksheet: null,
+    classXIIMarksheet: null,
+    coverLetter: null,
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-    // State for Personal Details
-    const [personalDetails, setPersonalDetails] = useState({
-        fullName: '',
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files: selectedFiles } = e.target;
+    setFiles({ ...files, [name]: selectedFiles[0] });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    // Validate required fields
+    if (!formData.applicantName) {
+      setError('Applicant Name is required');
+      return;
+    }
+    if (!formData.applicantEmail) {
+      setError('Applicant Email is required');
+      return;
+    }
+    if (!formData.applicantPhone) {
+      setError('Applicant Phone is required');
+      return;
+    }
+    if (!formData.communicationAddress) {
+      setError('Communication Address is required');
+      return;
+    }
+    if (!formData.universityRollNo) {
+      setError('University Roll Number is required');
+      return;
+    }
+    if (!formData.dob) {
+      setError('Date of Birth is required');
+      return;
+    }
+    if (!formData.collegeNameAddress) {
+      setError('College Name and Address is required');
+      return;
+    }
+    if (!formData.universityName) {
+      setError('University Name is required');
+      return;
+    }
+    if (!formData.currentCourse) {
+      setError('Current Course is required');
+      return;
+    }
+    if (!formData.currentSemester) {
+      setError('Current Semester is required');
+      return;
+    }
+    if (!formData.cityOfDomicile) {
+      setError('City of Domicile is required');
+      return;
+    }
+    if (!formData.stateOfDomicile) {
+      setError('State of Domicile is required');
+      return;
+    }
+    if (!files.aadharCard) {
+      setError('Aadhar Card is required');
+      return;
+    }
+    if (!files.classXMarksheet) {
+      setError('Class X Marksheet is required');
+      return;
+    }
+    if (!files.classXIIMarksheet) {
+      setError('Class XII Marksheet is required');
+      return;
+    }
+
+    const data = new FormData();
+    data.append('applicantName', formData.applicantName);
+    data.append('applicantEmail', formData.applicantEmail);
+    data.append('applicantPhone', formData.applicantPhone);
+    data.append('currentAddress', formData.communicationAddress);
+    data.append('universityRollNo', formData.universityRollNo);
+    data.append('dob', formData.dob);
+    data.append('collegeNameAddress', formData.collegeNameAddress);
+    data.append('universityName', formData.universityName);
+    data.append('currentCourse', formData.currentCourse);
+    data.append('currentSemester', formData.currentSemester);
+    data.append('cityOfDomicile', formData.cityOfDomicile);
+    data.append('stateOfDomicile', formData.stateOfDomicile);
+    data.append('governmentIdType', formData.governmentIdType);
+    data.append('academicDetails', formData.academicDetails);
+    data.append('progId', programId);
+    data.append('aadharCard', files.aadharCard);
+    data.append('classXMarksheet', files.classXMarksheet);
+    data.append('classXIIMarksheet', files.classXIIMarksheet);
+    if (files.coverLetter) {
+      data.append('coverLetter', files.coverLetter);
+    }
+
+    // Log FormData for debugging
+    for (let [key, value] of data.entries()) {
+      console.log(key, value);
+    }
+
+    try {
+      const response = await api.post('/api/applications', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setSuccess('Application submitted successfully!');
+      setFormData({
+        applicantName: '',
+        applicantEmail: '',
+        applicantPhone: '',
+        communicationAddress: '',
+        universityRollNo: '',
+        dob: '',
         collegeNameAddress: '',
         universityName: '',
-        universityRollNo: '',
-        courseStream: '',
+        currentCourse: '',
         currentSemester: '',
-        email: '',
-        mobile: '',
-        address: '',
-        dob: '',
-    });
-
-    // State for the dynamic Academic Details table
-    const [academicRecords, setAcademicRecords] = useState([
-        { exam: '', school: '', subjects: '', year: '', percentage: '' }
-    ]);
-
-    // State for document uploads
-    const [documents, setDocuments] = useState({
+        cityOfDomicile: '',
+        stateOfDomicile: '',
+        governmentIdType: 'AADHAR_CARD',
+        academicDetails: JSON.stringify([]),
+      });
+      setFiles({
         aadharCard: null,
         classXMarksheet: null,
         classXIIMarksheet: null,
-        coverLetter: null
-    });
-
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handlePersonalChange = (e) => {
-        const { name, value } = e.target;
-        setPersonalDetails(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleAcademicChange = (index, e) => {
-        const { name, value } = e.target;
-        const updatedRecords = [...academicRecords];
-        updatedRecords[index][name] = value;
-        setAcademicRecords(updatedRecords);
-    };
-
-    const addAcademicRecord = () => {
-        setAcademicRecords([...academicRecords, { exam: '', school: '', subjects: '', year: '', percentage: '' }]);
-    };
-
-    const removeAcademicRecord = (index) => {
-        if (academicRecords.length > 1) {
-            setAcademicRecords(academicRecords.filter((_, i) => i !== index));
-        }
-    };
-
-    const handleFileChange = (documentType, file) => {
-        setDocuments(prev => ({
-            ...prev,
-            [documentType]: file
-        }));
-    };
-
-
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        
-        try {
-            const formData = new FormData();
-            formData.append('programId', program.intProgId);
-            
-            // Prepare form data object
-            const applicationData = {
-                ...personalDetails,
-                academicRecords: academicRecords
-            };
-            formData.append('formData', JSON.stringify(applicationData));
-            
-            // Append documents
-            if (documents.aadharCard) {
-                formData.append('aadharCard', documents.aadharCard);
-            }
-            if (documents.classXMarksheet) {
-                formData.append('classXMarksheet', documents.classXMarksheet);
-            }
-            if (documents.classXIIMarksheet) {
-                formData.append('classXIIMarksheet', documents.classXIIMarksheet);
-            }
-            if (documents.coverLetter) {
-                formData.append('coverLetter', documents.coverLetter);
-            }
-            
-            await api.post('/applications', formData);
-            alert('Application submitted successfully!');
-            onClose();
-            navigate('/applicant-dashboard');
-        } catch (error) {
-            console.error('Error submitting application:', error);
-            alert('Error submitting application. Please try again.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        // Modal container with a backdrop
-        <div style={styles.modalBackdrop}>
-            <div style={styles.modalContent}>
-                <h2 style={{ textAlign: 'center', marginTop: 0 }}>Internship Application Form</h2>
-                <h3 style={{ textAlign: 'center', color: '#333' }}>Applying for: {program.intProgName}</h3>
-                
-                <form onSubmit={handleSubmit}>
-                    <fieldset style={styles.fieldset}>
-                        <legend>A. Personal Details</legend>
-                        <label>Name (In CAPS)</label>
-                        <input type="text" name="fullName" value={personalDetails.fullName} onChange={handlePersonalChange} required />
-                        <label>Name and Address of College/Institute/University</label>
-                        <textarea name="collegeNameAddress" value={personalDetails.collegeNameAddress} onChange={handlePersonalChange} required />
-                        <label>Affiliating University Name</label>
-                        <input type="text" name="universityName" value={personalDetails.universityName} onChange={handlePersonalChange} required />
-                        <label>University Roll No.</label>
-                        <input type="text" name="universityRollNo" value={personalDetails.universityRollNo} onChange={handlePersonalChange} required />
-                        <label>Currently Enrolled In (Course Name with Stream)</label>
-                        <input type="text" name="courseStream" value={personalDetails.courseStream} onChange={handlePersonalChange} required />
-                        <label>Current Semester</label>
-                        <input type="number" name="currentSemester" value={personalDetails.currentSemester} onChange={handlePersonalChange} required />
-                        <label>Internship Duration Applied For</label>
-                        <input type="text" value={`${program.progDurationWeeks} weeks`} disabled />
-                        <label>Email ID</label>
-                        <input type="email" name="email" value={personalDetails.email} onChange={handlePersonalChange} required />
-                        <label>Mobile No.</label>
-                        <input type="tel" name="mobile" value={personalDetails.mobile} onChange={handlePersonalChange} required />
-                        <label>Address for Communication</label>
-                        <textarea name="address" value={personalDetails.address} onChange={handlePersonalChange} required />
-                        <label>Date of Birth</label>
-                        <input type="date" name="dob" value={personalDetails.dob} onChange={handlePersonalChange} required />
-                    </fieldset>
-
-                    <fieldset style={styles.fieldset}>
-                        <legend>B. Academic Details</legend>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr>
-                                    <th>Examination</th>
-                                    <th>School/College</th>
-                                    <th>Subjects</th>
-                                    <th>Year</th>
-                                    <th>% of Marks</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {academicRecords.map((record, index) => (
-                                    <tr key={index}>
-                                        <td><input type="text" name="exam" value={record.exam} onChange={e => handleAcademicChange(index, e)} required /></td>
-                                        <td><input type="text" name="school" value={record.school} onChange={e => handleAcademicChange(index, e)} required /></td>
-                                        <td><input type="text" name="subjects" value={record.subjects} onChange={e => handleAcademicChange(index, e)} required /></td>
-                                        <td><input type="number" name="year" placeholder="YYYY" value={record.year} onChange={e => handleAcademicChange(index, e)} required /></td>
-                                        <td><input type="number" name="percentage" step="0.01" value={record.percentage} onChange={e => handleAcademicChange(index, e)} required /></td>
-                                        <td><button type="button" onClick={() => removeAcademicRecord(index)} disabled={academicRecords.length === 1}>Remove</button></td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        <button type="button" onClick={addAcademicRecord} style={{ marginTop: '10px' }}>Add Qualification</button>
-                    </fieldset>
-
-                    <fieldset style={styles.fieldset}>
-                        <legend>C. Document Uploads</legend>
-                        
-                        <div style={styles.documentUpload}>
-                            <label><span style={{color: 'red'}}>*</span> Aadhar Card:</label>
-                            <input
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={(e) => handleFileChange('aadharCard', e.target.files[0])}
-                                required
-                            />
-                            {documents.aadharCard && (
-                                <div style={styles.selectedFile}>
-                                    ✓ {documents.aadharCard.name}
-                                </div>
-                            )}
-                        </div>
-
-                        <div style={styles.documentUpload}>
-                            <label><span style={{color: 'red'}}>*</span> Class X Marksheet:</label>
-                            <input
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={(e) => handleFileChange('classXMarksheet', e.target.files[0])}
-                                required
-                            />
-                            {documents.classXMarksheet && (
-                                <div style={styles.selectedFile}>
-                                    ✓ {documents.classXMarksheet.name}
-                                </div>
-                            )}
-                        </div>
-
-                        <div style={styles.documentUpload}>
-                            <label><span style={{color: 'red'}}>*</span> Class XII Marksheet:</label>
-                            <input
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={(e) => handleFileChange('classXIIMarksheet', e.target.files[0])}
-                                required
-                            />
-                            {documents.classXIIMarksheet && (
-                                <div style={styles.selectedFile}>
-                                    ✓ {documents.classXIIMarksheet.name}
-                                </div>
-                            )}
-                        </div>
-
-                        <div style={styles.documentUpload}>
-                            <label>Cover Letter (Optional):</label>
-                            <input
-                                type="file"
-                                accept=".pdf,.doc,.docx"
-                                onChange={(e) => handleFileChange('coverLetter', e.target.files[0])}
-                            />
-                            {documents.coverLetter && (
-                                <div style={styles.selectedFile}>
-                                    ✓ {documents.coverLetter.name}
-                                </div>
-                            )}
-                        </div>
-
-                        <div style={styles.uploadNote}>
-                            <p><strong>Note:</strong> Please ensure all documents are clear and readable. Accepted formats: PDF, DOC, DOCX, JPG, PNG. Maximum file size: 5MB per file.</p>
-                        </div>
-                    </fieldset>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                        <button type="button" onClick={onClose}>Cancel</button>
-                        <button 
-                            type="submit" 
-                            disabled={isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet}
-                            style={{
-                                opacity: (isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) ? 0.6 : 1,
-                                cursor: (isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) ? 'not-allowed' : 'pointer'
-                            }}
-                        >
-                            {isSubmitting ? 'Submitting...' : 'Submit Application'}
-                        </button>
-                    </div>
-                    {(!documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) && (
-                        <p style={{ color: 'red', fontSize: '0.9em', textAlign: 'center', marginTop: '10px' }}>
-                            Please upload required documents (Aadhar Card, Class X Marksheet, Class XII Marksheet) to submit your application.
-                        </p>
-                    )}
-                </form>
-            </div>
-        </div>
-    );
-}
-
-// Styles for the modal and form
-const styles = {
-    modalBackdrop: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000,
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        width: '90%',
-        maxWidth: '800px',
-        maxHeight: '90vh',
-        overflowY: 'auto'
-    },
-    fieldset: {
-        marginBottom: '20px',
-        border: '1px solid #ccc',
-        padding: '15px',
-        borderRadius: '4px'
-    },
-    documentUpload: {
-        marginBottom: '15px'
-    },
-    selectedFile: {
-        padding: '5px 10px',
-        backgroundColor: '#dcfce7',
-        color: '#166534',
-        borderRadius: '4px',
-        fontSize: '0.9em',
-        marginTop: '5px'
-    },
-    additionalFiles: {
-        marginTop: '10px'
-    },
-    additionalFile: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '5px 10px',
-        backgroundColor: '#dcfce7',
-        color: '#166534',
-        borderRadius: '4px',
-        fontSize: '0.9em',
-        marginBottom: '5px'
-    },
-    removeButton: {
-        background: 'none',
-        border: 'none',
-        color: '#dc2626',
-        fontSize: '1.2em',
-        cursor: 'pointer',
-        padding: '0 5px'
-    },
-    uploadNote: {
-        padding: '10px',
-        backgroundColor: '#fffbeb',
-        border: '1px solid #fbbf24',
-        borderRadius: '4px',
-        marginTop: '15px',
-        fontSize: '0.9em',
-        color: '#92400e'
+        coverLetter: null,
+      });
+    } catch (err) {
+      console.error('Submission error:', err);
+      setError(`Failed to submit application: ${err.response?.data?.message || err.message}`);
     }
+  };
+
+  return (
+    <div className={styles.container}>
+      <h2>Apply for Internship Program</h2>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.inputGroup}>
+          <label>Applicant Name <span className={styles.required}>*</span></label>
+          <input
+            type="text"
+            name="applicantName"
+            value={formData.applicantName}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Applicant Email <span className={styles.required}>*</span></label>
+          <input
+            type="email"
+            name="applicantEmail"
+            value={formData.applicantEmail}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Applicant Phone <span className={styles.required}>*</span></label>
+          <input
+            type="tel"
+            name="applicantPhone"
+            value={formData.applicantPhone}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Communication Address <span className={styles.required}>*</span></label>
+          <textarea
+            name="communicationAddress"
+            value={formData.communicationAddress}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>University Roll Number <span className={styles.required}>*</span></label>
+          <input
+            type="text"
+            name="universityRollNo"
+            value={formData.universityRollNo}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Date of Birth <span className={styles.required}>*</span></label>
+          <input
+            type="date"
+            name="dob"
+            value={formData.dob}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>College Name and Address <span className={styles.required}>*</span></label>
+          <textarea
+            name="collegeNameAddress"
+            value={formData.collegeNameAddress}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>University Name <span className={styles.required}>*</span></label>
+          <input
+            type="text"
+            name="universityName"
+            value={formData.universityName}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Current Course <span className={styles.required}>*</span></label>
+          <input
+            type="text"
+            name="currentCourse"
+            value={formData.currentCourse}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Current Semester <span className={styles.required}>*</span></label>
+          <input
+            type="text"
+            name="currentSemester"
+            value={formData.currentSemester}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>City of Domicile <span className={styles.required}>*</span></label>
+          <input
+            type="text"
+            name="cityOfDomicile"
+            value={formData.cityOfDomicile}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>State of Domicile <span className={styles.required}>*</span></label>
+          <input
+            type="text"
+            name="stateOfDomicile"
+            value={formData.stateOfDomicile}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Government ID Type <span className={styles.required}>*</span></label>
+          <select
+            name="governmentIdType"
+            value={formData.governmentIdType}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="AADHAR_CARD">Aadhar Card</option>
+            <option value="PAN_CARD">PAN Card</option>
+            <option value="VOTER_ID">Voter ID</option>
+          </select>
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Aadhar Card <span className={styles.required}>*</span></label>
+          <input
+            type="file"
+            name="aadharCard"
+            onChange={handleFileChange}
+            accept=".pdf,.jpg,.png"
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Class X Marksheet <span className={styles.required}>*</span></label>
+          <input
+            type="file"
+            name="classXMarksheet"
+            onChange={handleFileChange}
+            accept=".pdf,.jpg,.png"
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Class XII Marksheet <span className={styles.required}>*</span></label>
+          <input
+            type="file"
+            name="classXIIMarksheet"
+            onChange={handleFileChange}
+            accept=".pdf,.jpg,.png"
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label>Cover Letter (Optional)</label>
+          <input
+            type="file"
+            name="coverLetter"
+            onChange={handleFileChange}
+            accept=".pdf,.doc,.docx"
+          />
+        </div>
+        {error && <div className={styles.error}>{error}</div>}
+        {success && <div className={styles.success}>{success}</div>}
+        <button type="submit" className={styles.submitButton}>Submit Application</button>
+      </form>
+    </div>
+  );
 };
 
 export default ApplicationForm;

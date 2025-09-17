@@ -1,128 +1,201 @@
+// backend/ims-backend/src/main/java/com/webel/ims/InternshipApplicationController.java
 package com.webel.ims;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/applications")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class InternshipApplicationController {
 
-    @Autowired private InternshipApplicationRepository applicationRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired private InternshipProgramRepository programRepository;
+    @Autowired
+    private InternshipApplicationRepository repository;
 
-    private final String UPLOAD_DIR = "./uploads/applications/";
-
-    @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<?> submitApplicationWithDocuments(
-            @RequestParam("programId") Integer programId,
-            @RequestParam("formData") String formDataJson,
-            @RequestParam(value = "governmentIdFile", required = false) MultipartFile governmentIdFile,
-            @RequestParam(value = "coverLetter", required = false) MultipartFile coverLetter,
-            @RequestParam(value = "classXMarksheet", required = false) MultipartFile classXMarksheet,
-            @RequestParam(value = "classXIIMarksheet", required = false) MultipartFile classXIIMarksheet
+    @PostMapping
+    public ResponseEntity<?> submitApplication(
+            @RequestParam("applicantName") String applicantName,
+            @RequestParam("applicantEmail") String applicantEmail,
+            @RequestParam("applicantPhone") String applicantPhone,
+            @RequestParam("currentAddress") String currentAddress,
+            @RequestParam("universityRollNo") String universityRollNo,
+            @RequestParam("dob") String dob,
+            @RequestParam("collegeNameAddress") String collegeNameAddress,
+            @RequestParam("universityName") String universityName,
+            @RequestParam("currentCourse") String currentCourse,
+            @RequestParam("currentSemester") String currentSemester,
+            @RequestParam("cityOfDomicile") String cityOfDomicile,
+            @RequestParam("stateOfDomicile") String stateOfDomicile,
+            @RequestParam("governmentIdType") String governmentIdType,
+            @RequestParam("academicDetails") String academicDetails,
+            @RequestParam("progId") Long progId,
+            @RequestParam("aadharCard") MultipartFile aadharCard,
+            @RequestParam("classXMarksheet") MultipartFile classXMarksheet,
+            @RequestParam("classXIIMarksheet") MultipartFile classXIIMarksheet,
+            @RequestParam(value = "coverLetter", required = false) MultipartFile coverLetter
     ) {
         try {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            User applicant = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("Applicant not found"));
-            
-            InternshipProgram program = programRepository.findById(programId)
-                    .orElseThrow(() -> new RuntimeException("Program not found"));
+            // Validate required fields
+            if (applicantName == null || applicantName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Applicant Name is required");
+            }
+            if (applicantEmail == null || applicantEmail.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Applicant Email is required");
+            }
+            if (applicantPhone == null || applicantPhone.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Applicant Phone is required");
+            }
+            if (currentAddress == null || currentAddress.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Communication Address is required");
+            }
+            if (universityRollNo == null || universityRollNo.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("University Roll Number is required");
+            }
+            if (dob == null || dob.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Date of Birth is required");
+            }
+            if (collegeNameAddress == null || collegeNameAddress.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("College Name and Address is required");
+            }
+            if (universityName == null || universityName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("University Name is required");
+            }
+            if (currentCourse == null || currentCourse.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Current Course is required");
+            }
+            if (currentSemester == null || currentSemester.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Current Semester is required");
+            }
+            if (cityOfDomicile == null || cityOfDomicile.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("City of Domicile is required");
+            }
+            if (stateOfDomicile == null || stateOfDomicile.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("State of Domicile is required");
+            }
+            if (governmentIdType == null || governmentIdType.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Government ID Type is required");
+            }
+            if (academicDetails == null || academicDetails.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Academic Details are required");
+            }
+            if (progId == null) {
+                return ResponseEntity.badRequest().body("Program ID is required");
+            }
+            if (aadharCard == null || aadharCard.isEmpty()) {
+                return ResponseEntity.badRequest().body("Aadhar Card is required");
+            }
+            if (classXMarksheet == null || classXMarksheet.isEmpty()) {
+                return ResponseEntity.badRequest().body("Class X Marksheet is required");
+            }
+            if (classXIIMarksheet == null || classXIIMarksheet.isEmpty()) {
+                return ResponseEntity.badRequest().body("Class XII Marksheet is required");
+            }
 
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> formData = mapper.readValue(formDataJson, new TypeReference<>() {});
+            // Create application entity
+            InternshipApplication application = new InternshipApplication();
+            application.setApplicantName(applicantName);
+            application.setApplicantEmail(applicantEmail);
+            application.setApplicantPhone(applicantPhone);
+            application.setCurrentAddress(currentAddress);
+            application.setUniversityRollNo(universityRollNo);
+            application.setDob(dob);
+            application.setCollegeNameAddress(collegeNameAddress);
+            application.setUniversityName(universityName);
+            application.setCurrentCourse(currentCourse);
+            application.setCurrentSemester(currentSemester);
+            application.setCityOfDomicile(cityOfDomicile);
+            application.setStateOfDomicile(stateOfDomicile);
+            application.setGovernmentIdType(governmentIdType);
+            application.setAcademicDetails(academicDetails);
+            application.setProgId(progId);
+            application.setApplicationStatus("PENDING");
+            application.setApplicationDate(LocalDateTime.now());
+            application.setCreatedAt(LocalDateTime.now());
+            application.setUpdatedAt(LocalDateTime.now());
 
-            InternshipApplication app = new InternshipApplication();
-            app.setApplicantUser(applicant);
-            app.setProgram(program);
-            app.setStatus("PENDING");
+            // Save uploaded files
+            String uploadDir = "./Uploads/applications/";
+            Files.createDirectories(Paths.get(uploadDir));
 
-            // Map fields from formData
-            app.setApplicantName((String) formData.get("fullName"));
-            app.setDob((String) formData.get("dob"));
-            app.setApplicantEmail((String) formData.get("email"));
-            app.setApplicantPhone((String) formData.get("mobile"));
-            app.setCurrentAddress((String) formData.get("currentAddress"));
-            app.setPermanentAddress((String) formData.get("permanentAddress"));
-            app.setCityOfDomicile((String) formData.get("cityOfDomicile"));
-            app.setStateOfDomicile((String) formData.get("stateOfDomicile"));
-            app.setCollegeNameAddress((String) formData.get("collegeNameAddress"));
-            app.setUniversityName((String) formData.get("universityName"));
-            app.setUniversityRegNo((String) formData.get("universityRegNo"));
-            app.setCurrentCourse((String) formData.get("courseStream"));
-            app.setCurrentSemester((String) formData.get("currentSemester"));
-            app.setGovernmentIdType((String) formData.get("governmentIdType"));
+            String aadharPath = saveFile(aadharCard, uploadDir, "aadhar_" + progId + "_" + System.currentTimeMillis());
+            String classXPath = saveFile(classXMarksheet, uploadDir, "classX_" + progId + "_" + System.currentTimeMillis());
+            String classXIIPath = saveFile(classXIIMarksheet, uploadDir, "classXII_" + progId + "_" + System.currentTimeMillis());
+            String coverLetterPath = coverLetter != null && !coverLetter.isEmpty()
+                    ? saveFile(coverLetter, uploadDir, "coverLetter_" + progId + "_" + System.currentTimeMillis())
+                    : null;
 
-            String academicDetailsJson = mapper.writeValueAsString(formData.get("academicRecords"));
-            app.setAcademicDetails(academicDetailsJson);
+            application.setAadharCardPath(aadharPath);
+            application.setClassXMarksheetPath(classXPath);
+            application.setClassXIIMarksheetPath(classXIIPath);
+            application.setCoverLetterPath(coverLetterPath);
 
-            // Handle file uploads
-            String userId = applicant.getUserId().toString();
-            String progId = program.getIntProgId().toString();
-
-            if (governmentIdFile != null) app.setGovernmentIdPath(saveFile(governmentIdFile, "govtId_" + userId + "_" + progId));
-            if (coverLetter != null) app.setCoverLetterPath(saveFile(coverLetter, "coverLetter_" + userId + "_" + progId));
-            if (classXMarksheet != null) app.setClassXMarksheetPath(saveFile(classXMarksheet, "classX_" + userId + "_" + progId));
-            if (classXIIMarksheet != null) app.setClassXIIMarksheetPath(saveFile(classXIIMarksheet, "classXII_" + userId + "_" + progId));
-            
-            applicationRepository.save(app);
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Application submitted successfully."));
-
+            // Save to database
+            repository.save(application);
+            return ResponseEntity.ok("Application submitted successfully");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Error processing application: " + e.getMessage()));
+            return ResponseEntity.status(500).body("Error processing application: " + e.getMessage());
         }
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<?> testEndpoint() {
+        return ResponseEntity.ok("API is working!");
+    }
+    
     @GetMapping("/my-applications")
-    public ResponseEntity<List<?>> getMyApplications() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User applicant = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Applicant not found"));
-
-        List<InternshipApplication> applications = applicationRepository.findByApplicantUserUserId(applicant.getUserId());
-        
-        return ResponseEntity.ok(applications.stream().map(app -> Map.of(
-            "programName", app.getProgram().getIntProgName(),
-            "status", app.getStatus(),
-            "appliedDate", app.getApplicationDate()
-        )).collect(Collectors.toList()));
-    }
-
-    private String saveFile(MultipartFile file, String prefix) {
+    public ResponseEntity<?> getMyApplications() {
         try {
-            File uploadDir = new File(UPLOAD_DIR);
-            if (!uploadDir.exists()) uploadDir.mkdirs();
+            System.out.println("my-applications endpoint called");
             
-            String originalFilename = file.getOriginalFilename();
-            String extension = Optional.ofNullable(originalFilename)
-                                     .filter(f -> f.contains("."))
-                                     .map(f -> f.substring(originalFilename.lastIndexOf(".")))
-                                     .orElse("");
-
-            String newFileName = prefix + "_" + System.currentTimeMillis() + extension;
-            Path path = Paths.get(UPLOAD_DIR + newFileName);
-            Files.write(path, file.getBytes());
-            return path.toString();
+            // For testing, let's return a simple response first
+            List<Map<String, Object>> response = new java.util.ArrayList<>();
+            
+            try {
+                // Try to get applications from database
+                List<InternshipApplication> applications = repository.findAll();
+                System.out.println("Found " + applications.size() + " applications");
+                
+                // Convert to a simplified format for the frontend
+                response = applications.stream().map(app -> {
+                    Map<String, Object> appMap = new HashMap<>();
+                    appMap.put("applicationId", app.getId());
+                    appMap.put("programName", "Program " + app.getProgId()); // Simplified - no lookup for now
+                    appMap.put("status", app.getApplicationStatus());
+                    appMap.put("appliedDate", app.getApplicationDate());
+                    return appMap;
+                }).collect(Collectors.toList());
+                
+            } catch (Exception dbError) {
+                System.out.println("Database error: " + dbError.getMessage());
+                dbError.printStackTrace();
+                // Return empty list if database error
+                response = new java.util.ArrayList<>();
+            }
+            
+            System.out.println("Returning response: " + response);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            e.printStackTrace(); // Log the full error
+            return ResponseEntity.status(500).body("Error fetching applications: " + e.getMessage());
         }
+    }
+    
+    private String saveFile(MultipartFile file, String uploadDir, String prefix) throws Exception {
+        String fileName = prefix + "_" + file.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+        Files.write(filePath, file.getBytes());
+        return filePath.toString();
     }
 }
