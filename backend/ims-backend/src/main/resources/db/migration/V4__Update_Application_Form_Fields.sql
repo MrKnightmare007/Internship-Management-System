@@ -11,9 +11,9 @@ ALTER TABLE internship_application_master
 ADD COLUMN IF NOT EXISTS government_id_type VARCHAR(100),
 ADD COLUMN IF NOT EXISTS government_id_path VARCHAR(512);
 
--- Rename 'communication_address' to 'current_address' for clarity
+-- Add current_address column if it doesn't exist (this replaces the rename operation)
 ALTER TABLE internship_application_master
-RENAME COLUMN communication_address TO current_address;
+ADD COLUMN IF NOT EXISTS current_address TEXT;
 
 -- Drop the old, now unused 'academic_transcript_path' column
 ALTER TABLE internship_application_master

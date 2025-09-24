@@ -18,7 +18,7 @@ public interface AcceptedStudentRepository extends JpaRepository<AcceptedStudent
     
     List<AcceptedStudent> findByShiftId(Integer shiftId);
     
-    @Query("SELECT as FROM AcceptedStudent as JOIN FETCH as.application app JOIN FETCH app.applicantUser WHERE as.programId = :programId")
+    @Query("SELECT as FROM AcceptedStudent as JOIN FETCH as.application app WHERE as.programId = :programId")
     List<AcceptedStudent> findByProgramIdWithApplicationDetails(@Param("programId") Integer programId);
     
     @Query("SELECT as FROM AcceptedStudent as WHERE as.programId = :programId AND as.admitCardGenerated = false")

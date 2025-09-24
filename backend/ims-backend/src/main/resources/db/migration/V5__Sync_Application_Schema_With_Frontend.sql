@@ -10,9 +10,27 @@ DROP COLUMN IF EXISTS aadhar_card_path;
 ALTER TABLE internship_application_master 
 ADD COLUMN IF NOT EXISTS government_id_path VARCHAR(500);
 
--- Rename current_course to course_stream to match frontend
-ALTER TABLE internship_application_master 
-CHANGE COLUMN current_course course_stream VARCHAR(255);
+-- Check if current_course exists and rename it to course_stream to match frontend
+DO $$
+BEGIN
+    -- Check if current_course exists
+    IF EXISTS (SELECT 1 FROM information_schema.columns 
+               WHERE table_name = 'internship_application_master' 
+               AND column_name = 'current_course') THEN
+        -- Add the new column if it doesn't exist
+        ALTER TABLE internship_application_master 
+        ADD COLUMN IF NOT EXISTS course_stream VARCHAR(255);
+        
+        -- Copy data from old column to new column
+        UPDATE internship_application_master 
+        SET course_stream = current_course 
+        WHERE current_course IS NOT NULL;
+        
+        -- Drop the old column
+        ALTER TABLE internship_application_master 
+        DROP COLUMN IF EXISTS current_course;
+    END IF;
+END $$;
 
 -- Add university_roll_no if it doesn't exist (should be from earlier migration)
 ALTER TABLE internship_application_master 

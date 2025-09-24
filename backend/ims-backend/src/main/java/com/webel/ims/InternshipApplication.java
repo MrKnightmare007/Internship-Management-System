@@ -18,34 +18,6 @@ public class InternshipApplication {
     @Column(name = "applicant_email", nullable = false)
     private String applicantEmail;
 
-    @Column(name = "communication_address", nullable = false)
-    private String currentAddress;
-
-    @Column(name = "university_roll_no", nullable = false)
-    private String universityRollNo;
-
-    @Column(name = "dob", nullable = false)
-    private String dob;
-
-    @Column(name = "college_name_address", nullable = false)
-    private String collegeNameAddress;
-
-    @Column(name = "university_name", nullable = false)
-    private String universityName;
-
-    @Column(name = "current_course", nullable = false)
-    private String currentCourse;
->>>>>>> dd3916422aba86ec268128d7264ca314bb9b71b2
-
-    @Column(name = "current_semester", nullable = false)
-    private String currentSemester;
-
-<<<<<<< HEAD
-    @Column(name = "academic_details")
-    private String academicDetails;
-    @Column(name = "city_of_domicile", nullable = false)
-    private String cityOfDomicile;
->>>>>>> dd3916422aba86ec268128d7264ca314bb9b71b2
     @Column(name = "applicant_phone", nullable = false)
     private String applicantPhone;
 
@@ -72,40 +44,7 @@ public class InternshipApplication {
 
     @Column(name = "city_of_domicile", nullable = false)
     private String cityOfDomicile;
-=======
-    @Column(name = "communication_address", nullable = false)
-    private String currentAddress;
 
-    @Column(name = "university_roll_no", nullable = false)
-    private String universityRollNo;
-
-    @Column(name = "dob", nullable = false)
-    private String dob;
-
-    @Column(name = "college_name_address", nullable = false)
-    private String collegeNameAddress;
-
-    @Column(name = "university_name", nullable = false)
-    private String universityName;
-
-    @Column(name = "current_course", nullable = false)
-    private String currentCourse;
->>>>>>> dd3916422aba86ec268128d7264ca314bb9b71b2
-
-    @Column(name = "current_semester", nullable = false)
-    private String currentSemester;
-
-<<<<<<< HEAD
-    @Column(name = "academic_details")
-    private String academicDetails;
-=======
-    @Column(name = "city_of_domicile", nullable = false)
-    private String cityOfDomicile;
->>>>>>> dd3916422aba86ec268128d7264ca314bb9b71b2
-
-    @Column(name = "cover_letter_path")
-    private String coverLetterPath;
->>>>>>> dd3916422aba86ec268128d7264ca314bb9b71b2
     @Column(name = "state_of_domicile", nullable = false)
     private String stateOfDomicile;
 
@@ -129,10 +68,12 @@ public class InternshipApplication {
 
     @Column(name = "cover_letter_path")
     private String coverLetterPath;
-=======
-    @Column(name = "cover_letter_path")
-    private String coverLetterPath;
->>>>>>> dd3916422aba86ec268128d7264ca314bb9b71b2
+
+    @Column(name = "passport_photo_path")
+    private String passportPhotoPath;
+
+    @Column(name = "signature_path")
+    private String signaturePath;
 
     @Column(name = "application_status", nullable = false)
     private String applicationStatus;
@@ -146,6 +87,7 @@ public class InternshipApplication {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -153,7 +95,6 @@ public class InternshipApplication {
     public void setId(Long id) {
         this.id = id;
     }
-=======
 
     public String getApplicantName() {
         return applicantName;
@@ -224,6 +165,14 @@ public class InternshipApplication {
     }
 
     public void setCurrentCourse(String currentCourse) {
+        this.currentCourse = currentCourse;
+    }
+
+    public String getCourseStream() {
+        return currentCourse;
+    }
+
+    public void setCourseStream(String currentCourse) {
         this.currentCourse = currentCourse;
     }
 
@@ -307,6 +256,22 @@ public class InternshipApplication {
         this.coverLetterPath = coverLetterPath;
     }
 
+    public String getPassportPhotoPath() {
+        return passportPhotoPath;
+    }
+
+    public void setPassportPhotoPath(String passportPhotoPath) {
+        this.passportPhotoPath = passportPhotoPath;
+    }
+
+    public String getSignaturePath() {
+        return signaturePath;
+    }
+
+    public void setSignaturePath(String signaturePath) {
+        this.signaturePath = signaturePath;
+    }
+
     public String getApplicationStatus() {
         return applicationStatus;
     }
@@ -339,4 +304,3 @@ public class InternshipApplication {
         this.updatedAt = updatedAt;
     }
 }
->>>>>>> dd3916422aba86ec268128d7264ca314bb9b71b2

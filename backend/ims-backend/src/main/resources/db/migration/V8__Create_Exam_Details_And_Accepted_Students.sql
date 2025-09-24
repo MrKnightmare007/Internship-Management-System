@@ -2,7 +2,7 @@
 -- Migration to create exam details and accepted students tables for admit card functionality
 
 -- Create exam_details table to store examination configuration for each internship program
-CREATE TABLE exam_details (
+CREATE TABLE IF NOT EXISTS exam_details (
     exam_id SERIAL PRIMARY KEY,
     program_id INTEGER NOT NULL,
     examination_location VARCHAR(500) NOT NULL,
@@ -10,14 +10,35 @@ CREATE TABLE exam_details (
     examination_date DATE NOT NULL,
     number_of_shifts INTEGER NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    CONSTRAINT fk_exam_program FOREIGN KEY (program_id) 
-        REFERENCES internship_program_master(int_prog_id) ON DELETE CASCADE
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Add foreign key constraint only if it doesn't exist and referenced table/column exist
+DO $$ 
+BEGIN
+    -- Check if the constraint exists
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_exam_program' 
+        AND table_name = 'exam_details'
+    ) THEN
+        -- Check if the referenced table and column exist
+        IF EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_name = 'internship_program_master'
+        ) AND EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'internship_program_master' AND column_name = 'int_prog_id'
+        ) THEN
+            ALTER TABLE exam_details 
+            ADD CONSTRAINT fk_exam_program FOREIGN KEY (program_id) 
+            REFERENCES internship_program_master(int_prog_id) ON DELETE CASCADE;
+        END IF;
+    END IF;
+END $$;
+
 -- Create exam_shifts table to store shift timings and capacity
-CREATE TABLE exam_shifts (
+CREATE TABLE IF NOT EXISTS exam_shifts (
     shift_id SERIAL PRIMARY KEY,
     exam_id INTEGER NOT NULL,
     shift_name VARCHAR(100) NOT NULL,
@@ -25,14 +46,32 @@ CREATE TABLE exam_shifts (
     end_time TIME NOT NULL,
     max_applicants INTEGER NOT NULL DEFAULT 50,
     current_applicants INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    CONSTRAINT fk_shift_exam FOREIGN KEY (exam_id) 
-        REFERENCES exam_details(exam_id) ON DELETE CASCADE
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Add foreign key constraint only if it doesn't exist and referenced table exists
+DO $$ 
+BEGIN
+    -- Check if the constraint exists
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_shift_exam' 
+        AND table_name = 'exam_shifts'
+    ) THEN
+        -- Check if the referenced table exists
+        IF EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_name = 'exam_details'
+        ) THEN
+            ALTER TABLE exam_shifts 
+            ADD CONSTRAINT fk_shift_exam FOREIGN KEY (exam_id) 
+            REFERENCES exam_details(exam_id) ON DELETE CASCADE;
+        END IF;
+    END IF;
+END $$;
+
 -- Create accepted_students table to track accepted applications with admit card details
-CREATE TABLE accepted_students (
+CREATE TABLE IF NOT EXISTS accepted_students (
     accepted_id SERIAL PRIMARY KEY,
     application_id INTEGER NOT NULL UNIQUE,
     program_id INTEGER NOT NULL,
@@ -44,28 +83,144 @@ CREATE TABLE accepted_students (
     admit_card_sent BOOLEAN DEFAULT FALSE,
     accepted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     admit_card_generated_at TIMESTAMP,
-    admit_card_sent_at TIMESTAMP,
-    
-    CONSTRAINT fk_accepted_application FOREIGN KEY (application_id) 
-        REFERENCES internship_applications(id) ON DELETE CASCADE,
-    CONSTRAINT fk_accepted_program FOREIGN KEY (program_id) 
-        REFERENCES internship_program_master(int_prog_id) ON DELETE CASCADE,
-    CONSTRAINT fk_accepted_exam FOREIGN KEY (exam_id) 
-        REFERENCES exam_details(exam_id) ON DELETE SET NULL,
-    CONSTRAINT fk_accepted_shift FOREIGN KEY (shift_id) 
-        REFERENCES exam_shifts(shift_id) ON DELETE SET NULL
+    admit_card_sent_at TIMESTAMP
 );
 
--- Create indexes for better performance
-CREATE INDEX idx_exam_details_program ON exam_details(program_id);
-CREATE INDEX idx_exam_shifts_exam ON exam_shifts(exam_id);
-CREATE INDEX idx_accepted_students_application ON accepted_students(application_id);
-CREATE INDEX idx_accepted_students_program ON accepted_students(program_id);
-CREATE INDEX idx_accepted_students_exam ON accepted_students(exam_id);
-CREATE INDEX idx_accepted_students_shift ON accepted_students(shift_id);
-CREATE INDEX idx_accepted_students_registration ON accepted_students(registration_number);
+-- Add foreign key constraints only if they don't exist and referenced tables/columns exist
+DO $$ 
+BEGIN
+    -- Check if the constraint exists
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_accepted_application' 
+        AND table_name = 'accepted_students'
+    ) THEN
+        -- Check if the referenced table and column exist
+        IF EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_name = 'internship_application_master'
+        ) AND EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'internship_application_master' AND column_name = 'id'
+        ) THEN
+            ALTER TABLE accepted_students 
+            ADD CONSTRAINT fk_accepted_application FOREIGN KEY (application_id) 
+            REFERENCES internship_application_master(id) ON DELETE CASCADE;
+        END IF;
+    END IF;
+    
+    -- Check if the constraint exists
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_accepted_program' 
+        AND table_name = 'accepted_students'
+    ) THEN
+        -- Check if the referenced table and column exist
+        IF EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_name = 'internship_program_master'
+        ) AND EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'internship_program_master' AND column_name = 'int_prog_id'
+        ) THEN
+            ALTER TABLE accepted_students 
+            ADD CONSTRAINT fk_accepted_program FOREIGN KEY (program_id) 
+            REFERENCES internship_program_master(int_prog_id) ON DELETE CASCADE;
+        END IF;
+    END IF;
+    
+    -- Check if the constraint exists
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_accepted_exam' 
+        AND table_name = 'accepted_students'
+    ) THEN
+        -- Check if the referenced table exists
+        IF EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_name = 'exam_details'
+        ) THEN
+            ALTER TABLE accepted_students 
+            ADD CONSTRAINT fk_accepted_exam FOREIGN KEY (exam_id) 
+            REFERENCES exam_details(exam_id) ON DELETE SET NULL;
+        END IF;
+    END IF;
+    
+    -- Check if the constraint exists
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_accepted_shift' 
+        AND table_name = 'accepted_students'
+    ) THEN
+        -- Check if the referenced table exists
+        IF EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_name = 'exam_shifts'
+        ) THEN
+            ALTER TABLE accepted_students 
+            ADD CONSTRAINT fk_accepted_shift FOREIGN KEY (shift_id) 
+            REFERENCES exam_shifts(shift_id) ON DELETE SET NULL;
+        END IF;
+    END IF;
+END $$;
+
+-- Create indexes for better performance (check if they exist first)
+-- PostgreSQL doesn't support IF NOT EXISTS for CREATE INDEX, so we check manually
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes 
+        WHERE tablename = 'exam_details' AND indexname = 'idx_exam_details_program'
+    ) THEN
+        CREATE INDEX idx_exam_details_program ON exam_details(program_id);
+    END IF;
+    
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes 
+        WHERE tablename = 'exam_shifts' AND indexname = 'idx_exam_shifts_exam'
+    ) THEN
+        CREATE INDEX idx_exam_shifts_exam ON exam_shifts(exam_id);
+    END IF;
+    
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes 
+        WHERE tablename = 'accepted_students' AND indexname = 'idx_accepted_students_application'
+    ) THEN
+        CREATE INDEX idx_accepted_students_application ON accepted_students(application_id);
+    END IF;
+    
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes 
+        WHERE tablename = 'accepted_students' AND indexname = 'idx_accepted_students_program'
+    ) THEN
+        CREATE INDEX idx_accepted_students_program ON accepted_students(program_id);
+    END IF;
+    
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes 
+        WHERE tablename = 'accepted_students' AND indexname = 'idx_accepted_students_exam'
+    ) THEN
+        CREATE INDEX idx_accepted_students_exam ON accepted_students(exam_id);
+    END IF;
+    
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes 
+        WHERE tablename = 'accepted_students' AND indexname = 'idx_accepted_students_shift'
+    ) THEN
+        CREATE INDEX idx_accepted_students_shift ON accepted_students(shift_id);
+    END IF;
+    
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_indexes 
+        WHERE tablename = 'accepted_students' AND indexname = 'idx_accepted_students_registration'
+    ) THEN
+        CREATE INDEX idx_accepted_students_registration ON accepted_students(registration_number);
+    END IF;
+END $$;
 
 -- Add trigger to update exam_shifts current_applicants count
+-- We'll drop and recreate the function to ensure it's up to date
+DROP FUNCTION IF EXISTS update_shift_applicant_count() CASCADE;
 CREATE OR REPLACE FUNCTION update_shift_applicant_count()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -102,12 +257,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for accepted_students table
+-- Drop the trigger first if it exists
+DROP TRIGGER IF EXISTS trigger_update_shift_count ON accepted_students;
 CREATE TRIGGER trigger_update_shift_count
     AFTER INSERT OR UPDATE OR DELETE ON accepted_students
     FOR EACH ROW
     EXECUTE FUNCTION update_shift_applicant_count();
 
--- Add comments for documentation
+-- Add comments for documentation (these are safe to run multiple times)
 COMMENT ON TABLE exam_details IS 'Stores examination configuration for internship programs';
 COMMENT ON TABLE exam_shifts IS 'Stores shift timings and capacity for examinations';
 COMMENT ON TABLE accepted_students IS 'Tracks accepted applications with admit card details';
