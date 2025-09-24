@@ -1,12 +1,8 @@
 import axios from 'axios';
 
 // Create a new instance of axios
-// const api = axios.create({
-//   baseURL: `${process.env.REACT_APP_API_URL}/api`
-// });
-
 const api = axios.create({
-  baseURL: '/api' // Use the relative path for local development with proxy
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api'
 });
 
 // Add a request interceptor to the instance
@@ -35,7 +31,7 @@ api.interceptors.response.use(
     // If the error is 401, redirect to the login page
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token'); // Clear the expired token
-      window.location.href = '/admin-login'; // Redirect to login
+      window.location.href = '/org-login'; // Redirect to organization login
     }
     return Promise.reject(error);
   }

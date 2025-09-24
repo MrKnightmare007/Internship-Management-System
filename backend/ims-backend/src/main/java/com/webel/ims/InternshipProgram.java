@@ -17,7 +17,7 @@ public class InternshipProgram {
     @Column(name = "int_prog_name", nullable = false)
     private String intProgName;
 
-    @Column(name = "int_prog_description", columnDefinition = "TEXT")
+    @Column(name = "int_prog_description")
     private String intProgDescription;
 
     @Column(name = "int_org_id", nullable = false)

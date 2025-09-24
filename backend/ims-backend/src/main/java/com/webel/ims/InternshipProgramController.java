@@ -158,13 +158,18 @@ public class InternshipProgramController {
     }
     
     private OrganizationMaster getCurrentUserOrganization() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-        User user = userRepository.findByUsername(currentUsername).orElse(null);
-        if (user != null && "ORGANIZATION_MASTER".equals(user.getUserType())) {
-            return user.getOrganization();
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication.getName();
+            User user = userRepository.findByUsernameWithOrganization(currentUsername).orElse(null);
+            if (user != null && "ORGANIZATION_MASTER".equals(user.getUserType())) {
+                return user.getOrganization();
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @GetMapping("/my-organization")

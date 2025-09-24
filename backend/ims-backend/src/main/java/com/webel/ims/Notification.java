@@ -20,7 +20,7 @@ public class Notification {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "message", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "message", nullable = false)
     private String message;
 
     // To store the path of the uploaded file, nullable

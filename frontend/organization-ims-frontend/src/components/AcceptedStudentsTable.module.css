@@ -1,0 +1,524 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.acceptedStudentsTable {
+  width: 95%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0;
+  position: relative;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+.headerInfo h2 {
+  margin: 0 0 8px 0;
+  color: #1f2937;
+  font-size: 1.5em;
+}
+
+.headerInfo p {
+  margin: 0 0 12px 0;
+  color: #6b7280;
+  font-size: 0.9em;
+}
+
+.statsInfo {
+  display: flex;
+  gap: 24px;
+  font-size: 0.9em;
+}
+
+.statsInfo span {
+  color: #374151;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.errorMessage {
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 0 24px 20px 24px;
+  border-left: 4px solid #dc2626;
+}
+
+.noData {
+  text-align: center;
+  padding: 48px 24px;
+  color: #6b7280;
+}
+
+.noData p {
+  margin: 8px 0;
+  font-size: 1.1em;
+}
+
+.tableActions {
+  padding: 0 24px 20px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.generateButton {
+  background-color: #059669;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.generateButton:hover:not(:disabled) {
+  background-color: #047857;
+}
+
+.generateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.setupRequired {
+  background-color: #fef3c7;
+  color: #d97706;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border-left: 4px solid #d97706;
+}
+
+.tableContainer {
+  margin: 0 24px;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.studentsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.studentsTable th,
+.studentsTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.studentsTable th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.studentsTable tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.registrationCell {
+  min-width: 150px;
+}
+
+.registrationNumber {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #1e40af;
+  background-color: #dbeafe;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.nameCell {
+  min-width: 180px;
+}
+
+.studentName {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.studentPhone {
+  font-size: 0.85em;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.semester {
+  font-size: 0.85em;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.shiftInfo {
+  min-width: 140px;
+}
+
+.shiftName {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.examTime {
+  font-size: 0.85em;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.notAssigned {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.statusBadge.pending {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.statusBadge.generated {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.statusBadge.sent {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.examInfo {
+  margin: 24px;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.examInfo h3 {
+  margin: 0 0 16px 0;
+  color: #1f2937;
+  font-size: 1.2em;
+}
+
+.examDetails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.examDetailItem {
+  font-size: 0.9em;
+  color: #374151;
+}
+
+.shiftsInfo h4 {
+  margin: 0 0 12px 0;
+  color: #1f2937;
+  font-size: 1.1em;
+}
+
+.shiftsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.shiftCard {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.shiftHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.shiftHeader strong {
+  color: #1f2937;
+}
+
+.shiftTime {
+  font-size: 0.85em;
+  color: #6b7280;
+}
+
+.shiftCapacity {
+  font-size: 0.85em;
+  color: #374151;
+}
+
+.capacityBar {
+  width: 100%;
+  height: 6px;
+  background-color: #e5e7eb;
+  border-radius: 3px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.capacityFill {
+  height: 100%;
+  background-color: #10b981;
+  transition: width 0.3s ease;
+}
+
+.tableFooter {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  position: sticky;
+  bottom: 0;
+  background: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: 10px;
+  }
+  
+  .acceptedStudentsTable {
+    width: 98%;
+    max-height: 95vh;
+  }
+  
+  .tableHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+  
+  .statsInfo {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .tableActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .generateButton {
+    width: 100%;
+  }
+  
+  .studentsTable {
+    font-size: 12px;
+  }
+  
+  .studentsTable th,
+  .studentsTable td {
+    padding: 8px;
+  }
+  
+  .examDetails {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .shiftsList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: 5px;
+  }
+  
+  .tableHeader,
+  .tableActions,
+  .examInfo,
+  .tableFooter {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .tableContainer {
+    margin: 0 16px;
+  }
+}
+
+/* New styles for final selection functionality */
+.filtersSection {
+  margin: 0 24px 24px 24px;
+  padding: 20px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.filtersSection h3 {
+  margin: 0 0 16px 0;
+  color: #1f2937;
+  font-size: 1.1em;
+}
+
+.filtersContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterGroup label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9em;
+}
+
+.filterInput {
+  padding: 8px 12px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.filterInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.filterStats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9em;
+  color: #6b7280;
+}
+
+.selectedCount {
+  color: #059669;
+  font-weight: 600;
+}
+
+.actionsGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.selectButton {
+  background-color: #059669;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.selectButton:hover:not(:disabled) {
+  background-color: #047857;
+}
+
+.selectButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.checkboxColumn {
+  width: 40px;
+  text-align: center;
+}
+
+.selectAllCheckbox,
+.studentCheckbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.selectAllCheckbox {
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .filtersContainer {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .actionsGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .selectButton,
+  .generateButton {
+    width: 100%;
+  }
+}

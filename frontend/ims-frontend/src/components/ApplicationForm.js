@@ -29,9 +29,11 @@ function ApplicationForm({ program, onClose }) {
     // State for document uploads
     const [documents, setDocuments] = useState({
         aadharCard: null,
+        resume: null,
+        passportPhoto: null,
+        signature: null,
         classXMarksheet: null,
-        classXIIMarksheet: null,
-        coverLetter: null
+        classXIIMarksheet: null
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,16 +86,22 @@ function ApplicationForm({ program, onClose }) {
             
             // Append documents
             if (documents.aadharCard) {
-                formData.append('aadharCard', documents.aadharCard);
+                formData.append('governmentIdFile', documents.aadharCard);
+            }
+            if (documents.resume) {
+                formData.append('resumeFile', documents.resume);
+            }
+            if (documents.passportPhoto) {
+                formData.append('passportPhotoFile', documents.passportPhoto);
+            }
+            if (documents.signature) {
+                formData.append('signatureFile', documents.signature);
             }
             if (documents.classXMarksheet) {
                 formData.append('classXMarksheet', documents.classXMarksheet);
             }
             if (documents.classXIIMarksheet) {
                 formData.append('classXIIMarksheet', documents.classXIIMarksheet);
-            }
-            if (documents.coverLetter) {
-                formData.append('coverLetter', documents.coverLetter);
             }
             
             await api.post('/applications', formData);
@@ -138,8 +146,20 @@ function ApplicationForm({ program, onClose }) {
                         <input type="tel" name="mobile" value={personalDetails.mobile} onChange={handlePersonalChange} required />
                         <label>Address for Communication</label>
                         <textarea name="address" value={personalDetails.address} onChange={handlePersonalChange} required />
-                        <label>Date of Birth</label>
-                        <input type="date" name="dob" value={personalDetails.dob} onChange={handlePersonalChange} required />
+                        <label>Date of Birth <span style={{color: 'red'}}>*</span></label>
+                        <input 
+                            type="date" 
+                            name="dob" 
+                            value={personalDetails.dob} 
+                            onChange={handlePersonalChange} 
+                            required 
+                            style={{
+                                padding: '8px',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                                fontSize: '14px'
+                            }}
+                        />
                     </fieldset>
 
                     <fieldset style={styles.fieldset}>
@@ -220,21 +240,69 @@ function ApplicationForm({ program, onClose }) {
                         </div>
 
                         <div style={styles.documentUpload}>
-                            <label>Cover Letter (Optional):</label>
+                            <label><span style={{color: 'red'}}>*</span> Resume/CV:</label>
                             <input
                                 type="file"
                                 accept=".pdf,.doc,.docx"
-                                onChange={(e) => handleFileChange('coverLetter', e.target.files[0])}
+                                onChange={(e) => handleFileChange('resume', e.target.files[0])}
+                                required
                             />
-                            {documents.coverLetter && (
+                            {documents.resume && (
                                 <div style={styles.selectedFile}>
-                                    ✓ {documents.coverLetter.name}
+                                    ✓ {documents.resume.name}
                                 </div>
                             )}
+                            <div style={styles.fieldNote}>
+                                <small>Upload your updated resume/CV in PDF, DOC, or DOCX format.</small>
+                            </div>
+                        </div>
+
+                        <div style={styles.documentUpload}>
+                            <label><span style={{color: 'red'}}>*</span> Passport Size Photo:</label>
+                            <input
+                                type="file"
+                                accept=".jpg,.jpeg,.png"
+                                onChange={(e) => handleFileChange('passportPhoto', e.target.files[0])}
+                                required
+                            />
+                            {documents.passportPhoto && (
+                                <div style={styles.selectedFile}>
+                                    ✓ {documents.passportPhoto.name}
+                                </div>
+                            )}
+                            <div style={styles.fieldNote}>
+                                <small>Upload a clear passport size photo (recommended: 3.5cm x 4.5cm, JPG/PNG format).</small>
+                            </div>
+                        </div>
+
+                        <div style={styles.documentUpload}>
+                            <label><span style={{color: 'red'}}>*</span> Digital Signature:</label>
+                            <input
+                                type="file"
+                                accept=".jpg,.jpeg,.png"
+                                onChange={(e) => handleFileChange('signature', e.target.files[0])}
+                                required
+                            />
+                            {documents.signature && (
+                                <div style={styles.selectedFile}>
+                                    ✓ {documents.signature.name}
+                                </div>
+                            )}
+                            <div style={styles.fieldNote}>
+                                <small>Upload your signature on white background (JPG/PNG format).</small>
+                            </div>
                         </div>
 
                         <div style={styles.uploadNote}>
-                            <p><strong>Note:</strong> Please ensure all documents are clear and readable. Accepted formats: PDF, DOC, DOCX, JPG, PNG. Maximum file size: 5MB per file.</p>
+                            <p><strong>Document Requirements:</strong></p>
+                            <ul style={{margin: '5px 0', paddingLeft: '20px'}}>
+                                <li>All documents should be clear and readable</li>
+                                <li>Resume: PDF, DOC, DOCX formats accepted</li>
+                                <li>Photo: JPG, PNG formats, passport size (3.5cm x 4.5cm recommended)</li>
+                                <li>Signature: JPG, PNG formats on white background</li>
+                                <li>Marksheets: PDF, JPG, PNG formats accepted</li>
+                                <li>Maximum file size: 5MB per document</li>
+                            </ul>
                         </div>
                     </fieldset>
                     
@@ -242,18 +310,24 @@ function ApplicationForm({ program, onClose }) {
                         <button type="button" onClick={onClose}>Cancel</button>
                         <button 
                             type="submit" 
-                            disabled={isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet}
+                            disabled={isSubmitting || !documents.aadharCard || !documents.resume || !documents.passportPhoto || !documents.signature || !documents.classXMarksheet || !documents.classXIIMarksheet}
                             style={{
-                                opacity: (isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) ? 0.6 : 1,
-                                cursor: (isSubmitting || !documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) ? 'not-allowed' : 'pointer'
+                                opacity: (isSubmitting || !documents.aadharCard || !documents.resume || !documents.passportPhoto || !documents.signature || !documents.classXMarksheet || !documents.classXIIMarksheet) ? 0.6 : 1,
+                                cursor: (isSubmitting || !documents.aadharCard || !documents.resume || !documents.passportPhoto || !documents.signature || !documents.classXMarksheet || !documents.classXIIMarksheet) ? 'not-allowed' : 'pointer',
+                                backgroundColor: '#007bff',
+                                color: 'white',
+                                border: 'none',
+                                padding: '12px 24px',
+                                borderRadius: '4px',
+                                fontSize: '16px'
                             }}
                         >
                             {isSubmitting ? 'Submitting...' : 'Submit Application'}
                         </button>
                     </div>
-                    {(!documents.aadharCard || !documents.classXMarksheet || !documents.classXIIMarksheet) && (
+                    {(!documents.aadharCard || !documents.resume || !documents.passportPhoto || !documents.signature || !documents.classXMarksheet || !documents.classXIIMarksheet) && (
                         <p style={{ color: 'red', fontSize: '0.9em', textAlign: 'center', marginTop: '10px' }}>
-                            Please upload required documents (Aadhar Card, Class X Marksheet, Class XII Marksheet) to submit your application.
+                            Please upload all required documents (Aadhar Card, Resume, Passport Photo, Signature, Class X & XII Marksheets) to submit your application.
                         </p>
                     )}
                 </form>
@@ -332,6 +406,11 @@ const styles = {
         marginTop: '15px',
         fontSize: '0.9em',
         color: '#92400e'
+    },
+    fieldNote: {
+        marginTop: '5px',
+        color: '#666',
+        fontSize: '0.8em'
     }
 };
 

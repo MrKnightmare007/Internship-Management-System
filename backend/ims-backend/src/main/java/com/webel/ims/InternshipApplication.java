@@ -33,10 +33,10 @@ public class InternshipApplication {
     @Column(name = "applicant_phone")
     private String applicantPhone;
 
-    @Column(name = "current_address", columnDefinition = "TEXT")
+    @Column(name = "current_address")
     private String currentAddress;
 
-    @Column(name = "permanent_address", columnDefinition = "TEXT")
+    @Column(name = "permanent_address")
     private String permanentAddress;
     
     @Column(name = "city_of_domicile")
@@ -45,7 +45,7 @@ public class InternshipApplication {
     @Column(name = "state_of_domicile")
     private String stateOfDomicile;
 
-    @Column(name = "college_name_address", columnDefinition = "TEXT")
+    @Column(name = "college_name_address")
     private String collegeNameAddress;
 
     @Column(name = "university_name")
@@ -57,13 +57,13 @@ public class InternshipApplication {
     @Column(name = "university_roll_no")
     private String universityRollNo;
 
-    @Column(name = "current_course")
-    private String currentCourse;
+    @Column(name = "course_stream")
+    private String courseStream;
 
     @Column(name = "current_semester")
     private String currentSemester;
 
-    @Column(name = "academic_details", columnDefinition = "TEXT")
+    @Column(name = "academic_details")
     private String academicDetails;
 
     // --- Document Fields ---
@@ -73,8 +73,14 @@ public class InternshipApplication {
     @Column(name = "government_id_path")
     private String governmentIdPath;
 
-    @Column(name = "cover_letter_path")
-    private String coverLetterPath;
+    @Column(name = "resume_path")
+    private String resumePath;
+    
+    @Column(name = "passport_photo_path")
+    private String passportPhotoPath;
+    
+    @Column(name = "signature_path")
+    private String signaturePath;
     
     @Column(name = "class_x_marksheet_path")
     private String classXMarksheetPath;
@@ -139,8 +145,8 @@ public class InternshipApplication {
     public void setUniversityRegNo(String universityRegNo) { this.universityRegNo = universityRegNo; }
     public String getUniversityRollNo() { return universityRollNo; }
     public void setUniversityRollNo(String universityRollNo) { this.universityRollNo = universityRollNo; }
-    public String getCurrentCourse() { return currentCourse; }
-    public void setCurrentCourse(String currentCourse) { this.currentCourse = currentCourse; }
+    public String getCourseStream() { return courseStream; }
+    public void setCourseStream(String courseStream) { this.courseStream = courseStream; }
     public String getCurrentSemester() { return currentSemester; }
     public void setCurrentSemester(String currentSemester) { this.currentSemester = currentSemester; }
     public String getAcademicDetails() { return academicDetails; }
@@ -149,8 +155,16 @@ public class InternshipApplication {
     public void setGovernmentIdType(String governmentIdType) { this.governmentIdType = governmentIdType; }
     public String getGovernmentIdPath() { return governmentIdPath; }
     public void setGovernmentIdPath(String governmentIdPath) { this.governmentIdPath = governmentIdPath; }
-    public String getCoverLetterPath() { return coverLetterPath; }
-    public void setCoverLetterPath(String coverLetterPath) { this.coverLetterPath = coverLetterPath; }
+    
+    public String getResumePath() { return resumePath; }
+    public void setResumePath(String resumePath) { this.resumePath = resumePath; }
+    
+    public String getPassportPhotoPath() { return passportPhotoPath; }
+    public void setPassportPhotoPath(String passportPhotoPath) { this.passportPhotoPath = passportPhotoPath; }
+    
+    public String getSignaturePath() { return signaturePath; }
+    public void setSignaturePath(String signaturePath) { this.signaturePath = signaturePath; }
+    
     public String getClassXMarksheetPath() { return classXMarksheetPath; }
     public void setClassXMarksheetPath(String classXMarksheetPath) { this.classXMarksheetPath = classXMarksheetPath; }
     public String getClassXIIMarksheetPath() { return classXIIMarksheetPath; }

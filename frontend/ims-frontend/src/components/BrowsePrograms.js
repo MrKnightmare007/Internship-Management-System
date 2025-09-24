@@ -17,6 +17,7 @@ const ApplicationForm = ({ onApply, program, onClose }) => {
         collegeNameAddress: '',
         universityName: '',
         universityRegNo: '',
+        universityRollNo: '',
         courseStream: '',
         currentSemester: '',
         email: '',
@@ -37,7 +38,9 @@ const ApplicationForm = ({ onApply, program, onClose }) => {
     // State for the document uploads
     const [files, setFiles] = useState({
         governmentIdFile: null,
-        coverLetter: null,
+        resumeFile: null,
+        passportPhotoFile: null,
+        signatureFile: null,
         classXMarksheet: null,
         classXIIMarksheet: null
     });
@@ -110,6 +113,7 @@ const ApplicationForm = ({ onApply, program, onClose }) => {
                     <input name="collegeNameAddress" placeholder="Name & Address of College/Institute *" className={styles.fullWidth} value={formData.collegeNameAddress} onChange={handleInputChange} required />
                     <input name="universityName" placeholder="Affiliating University Name *" value={formData.universityName} onChange={handleInputChange} required />
                     <input name="universityRegNo" placeholder="University Registration No. *" value={formData.universityRegNo} onChange={handleInputChange} required />
+                    <input name="universityRollNo" placeholder="University Roll No. *" value={formData.universityRollNo} onChange={handleInputChange} required />
                     <input name="courseStream" placeholder="Course Name with Stream *" value={formData.courseStream} onChange={handleInputChange} required />
                     <input name="currentSemester" placeholder="Current Semester *" value={formData.currentSemester} onChange={handleInputChange} required />
                 </div>
@@ -147,8 +151,19 @@ const ApplicationForm = ({ onApply, program, onClose }) => {
                         <input type="file" name="governmentIdFile" onChange={handleFileChange} required/>
                     </div>
                     <div className={styles.inputGroup}>
-                        <label>Cover Letter (Optional)</label>
-                        <input type="file" name="coverLetter" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+                        <label>Resume/CV *</label>
+                        <input type="file" name="resumeFile" accept=".pdf,.doc,.docx" onChange={handleFileChange} required/>
+                        <small>Upload your updated resume/CV (PDF, DOC, DOCX)</small>
+                    </div>
+                    <div className={styles.inputGroup}>
+                        <label>Passport Size Photo *</label>
+                        <input type="file" name="passportPhotoFile" accept=".jpg,.jpeg,.png" onChange={handleFileChange} required/>
+                        <small>Upload passport size photo (3.5cm x 4.5cm recommended)</small>
+                    </div>
+                    <div className={styles.inputGroup}>
+                        <label>Digital Signature *</label>
+                        <input type="file" name="signatureFile" accept=".jpg,.jpeg,.png" onChange={handleFileChange} required/>
+                        <small>Upload signature on white background</small>
                     </div>
                     <div className={styles.inputGroup}>
                         <label>Class X Marksheet/Certificate</label>
@@ -268,7 +283,9 @@ const BrowsePrograms = () => {
         
         // Append all files
         if (files.governmentIdFile) formDataToSend.append('governmentIdFile', files.governmentIdFile);
-        if (files.coverLetter) formDataToSend.append('coverLetter', files.coverLetter);
+        if (files.resumeFile) formDataToSend.append('resumeFile', files.resumeFile);
+        if (files.passportPhotoFile) formDataToSend.append('passportPhotoFile', files.passportPhotoFile);
+        if (files.signatureFile) formDataToSend.append('signatureFile', files.signatureFile);
         if (files.classXMarksheet) formDataToSend.append('classXMarksheet', files.classXMarksheet);
         if (files.classXIIMarksheet) formDataToSend.append('classXIIMarksheet', files.classXIIMarksheet);
 

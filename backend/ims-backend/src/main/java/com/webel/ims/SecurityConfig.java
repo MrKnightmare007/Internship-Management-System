@@ -48,6 +48,10 @@ public class SecurityConfig {
                     var corsConfig = new CorsConfiguration();
                     // Local development URLs
                     corsConfig.addAllowedOrigin("http://localhost:3000");
+                    corsConfig.addAllowedOrigin("http://localhost:3001");
+                    corsConfig.addAllowedOrigin("http://localhost:3002");
+                    corsConfig.addAllowedOrigin("http://localhost:3003");
+                    corsConfig.addAllowedOrigin("http://localhost:3004");
                     corsConfig.addAllowedOrigin("http://admin.localhost:3000");
                     corsConfig.addAllowedOrigin("http://organization.localhost:3000");
 

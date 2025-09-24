@@ -1,0 +1,149 @@
+.admit-wrapper {
+  display: flex;
+  justify-content: center;
+  background: #f0f6ff;
+  padding: 20px;
+}
+
+.admit-card {
+  width: 900px;
+  background: #fff;
+  border: 3px solid #1e40af;
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  font-family: Arial, sans-serif;
+}
+
+/* Header Banner */
+.admit-header {
+  text-align: center;
+  background: #1e3a8a; /* deep blue */
+  color: #fff;
+  padding: 10px 0;
+  border-radius: 4px 4px 0 0;
+  margin-bottom: 20px;
+}
+.admit-header h2 {
+  font-size: 14px;
+  margin: 0;
+  font-weight: 500;
+}
+.admit-header h1 {
+  font-size: 20px;
+  margin: 3px 0 0;
+  font-weight: bold;
+}
+
+/* Candidate Section */
+.top-section {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.photo-box {
+  width: 120px;
+  height: 150px;
+  border: 2px solid #1e40af;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #555;
+  font-size: 12px;
+}
+.details {
+  flex: 1;
+  padding: 0 15px;
+}
+.details p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+.details strong {
+  color: #1e40af;
+}
+/* Candidate Info Alternating Background */
+.details p:nth-child(odd) {
+  background: #f0f6ff;
+  padding: 3px;
+  border-radius: 4px;
+}
+
+/* Barcode */
+.barcode-box {
+  width: 150px;
+  height: 60px;
+  border: 2px dashed #1e40af;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #1e40af;
+  line-height: 60px;
+}
+
+/* Candidate Signature */
+.signature-block {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+/* Candidate Signature Box */
+.candidate-sign {
+  border: 1px solid #000;
+  width: 250px;
+  height: 60px;
+  margin: 10px auto;
+  text-align: center;
+  font-size: 12px;
+  padding-top: 35px;
+  color: #444;
+}
+.sig-line {
+  border-bottom: 1px solid #000;
+  width: 200px;
+  margin: 0 auto;
+  font-size: 12px;
+  padding-top: 20px;
+}
+
+/* Footer: Institute + Signatory */
+.footer-block {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  border-top: 2px solid #1e40af;
+  padding-top: 10px;
+}
+.institute h3 {
+  margin: 5px 0 0;
+  color: #1e40af;
+}
+.signatory {
+  text-align: right;
+  font-size: 12px;
+}
+.signatory .sig-line {
+  margin-bottom: 5px;
+  border-bottom: 1px solid #000;
+}
+
+/* Instructions Yellow Box */
+.instructions {
+  margin-top: 20px;
+  border: 2px solid #1e40af;
+}
+.instructions h3 {
+  background: #1e40af;
+  color: #fff;
+  padding: 6px;
+  font-size: 15px;
+  margin: 0;
+}
+.instructions ol {
+  background: #fff9db; /* light yellow */
+  padding: 15px 25px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.instructions li {
+  margin-bottom: 6px;
+}

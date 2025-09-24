@@ -4,6 +4,8 @@ import styles from './ManageApplications.module.css';
 import Card from './ui/Card';
 import Loader from './ui/Loader';
 import Button from './ui/Button';
+import ExamSetupForm from './ExamSetupForm';
+import AcceptedStudentsTable from './AcceptedStudentsTable';
 
 const ManageApplications = () => {
     const [applications, setApplications] = useState([]);
@@ -17,22 +19,32 @@ const ManageApplications = () => {
         program: 'ALL',
         search: ''
     });
+    const [showClosedInternships, setShowClosedInternships] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
     const [showBulkConfirm, setShowBulkConfirm] = useState(false);
     const [bulkAction, setBulkAction] = useState(null);
     const [showDocumentPreview, setShowDocumentPreview] = useState(false);
     const [previewDocumentData, setPreviewDocumentData] = useState(null);
+    const [showExamSetupForm, setShowExamSetupForm] = useState(false);
+    const [showAcceptedStudentsTable, setShowAcceptedStudentsTable] = useState(false);
+    const [selectedProgramForExam, setSelectedProgramForExam] = useState(null);
+    const [acceptedStudentsData, setAcceptedStudentsData] = useState({});
+    const [examSetupData, setExamSetupData] = useState({});
 
     useEffect(() => {
-        fetchApplications();
+        loadApplications();
     }, []);
 
     useEffect(() => {
-        applyFilters();
-    }, [applications, filters]);
+        // Fetch accepted students data after applications are loaded
+        if (applications.length > 0) {
+            fetchAcceptedStudentsData();
+        }
+    }, [applications]);
 
-    const fetchApplications = async () => {
+    const loadApplications = async () => {
+        setIsLoading(true);
         try {
             const response = await api.get('/applications/organization');
             setApplications(response.data);
@@ -43,8 +55,84 @@ const ManageApplications = () => {
         }
     };
 
+    useEffect(() => {
+        applyFilters();
+    }, [applications, filters, showClosedInternships]);
+
+    const fetchAcceptedStudentsData = async () => {
+        try {
+            console.log('Fetching accepted students data...');
+            console.log('Applications data:', applications);
+            
+            // Get unique programs from applications with better extraction logic
+            const uniquePrograms = [...new Set(applications.map(app => {
+                // Try multiple ways to get program ID and name
+                const programId = app.program?.id || app.program?.intProgId || app.programId || app.progId;
+                const programName = app.programName || app.program?.intProgName || app.program?.name;
+                
+                console.log('App data:', {
+                    app,
+                    extractedId: programId,
+                    extractedName: programName
+                });
+                
+                return JSON.stringify({
+                    id: programId,
+                    name: programName
+                });
+            }))].map(str => JSON.parse(str)).filter(p => p.id && p.name); // Ensure both ID and name exist
+
+            console.log('Unique programs found:', uniquePrograms);
+
+            const acceptedData = {};
+            const examData = {};
+
+            for (const program of uniquePrograms) {
+                try {
+                    console.log(`Fetching accepted students for program ID: ${program.id}`);
+                    // Fetch accepted students count
+                    const acceptedResponse = await api.get(`/exam/accepted-students/${program.id}`);
+                    console.log(`API response for program ${program.id}:`, acceptedResponse.data);
+                    acceptedData[program.id] = acceptedResponse.data.acceptedStudents || [];
+                    console.log(`Program ${program.id} accepted students:`, acceptedData[program.id].length);
+
+                    // Fetch exam setup data
+                    try {
+                        const examResponse = await api.get(`/exam/details/${program.id}`);
+                        examData[program.id] = examResponse.data;
+                        console.log(`Exam data for program ${program.id}:`, examData[program.id]);
+                    } catch (examError) {
+                        // Exam not setup yet, which is fine
+                        examData[program.id] = null;
+                        console.log(`No exam setup for program ${program.id}:`, examError.response?.status);
+                    }
+                } catch (error) {
+                    console.warn(`Error fetching data for program ${program.id}:`, error);
+                    console.log(`Error details:`, error.response?.data);
+                }
+            }
+
+            setAcceptedStudentsData(acceptedData);
+            setExamSetupData(examData);
+            console.log('Accepted students data updated:', acceptedData);
+        } catch (error) {
+            console.error('Error fetching accepted students data:', error);
+        }
+    };
+
     const applyFilters = () => {
         let filtered = [...applications];
+
+        // Filter out closed internships unless showClosedInternships is true
+        if (!showClosedInternships) {
+            filtered = filtered.filter(app => {
+                const program = app.program;
+                const isClosedByStatus = program?.progStatus === 'CLOSED';
+                const isClosedByDate = program?.programApplicationEndDate && 
+                    new Date(program.programApplicationEndDate) < new Date();
+                return !isClosedByStatus && !isClosedByDate;
+            });
+        }
 
         if (filters.status !== 'ALL') {
             filtered = filtered.filter(app => app.status === filters.status);
@@ -81,7 +169,11 @@ const ManageApplications = () => {
     const updateApplicationStatus = async (applicationId, status) => {
         try {
             await api.put(`/applications/${applicationId}/status`, { status });
-            await fetchApplications();
+            await loadApplications();
+            // Also refresh accepted students data immediately after accepting
+            if (status === 'ACCEPTED') {
+                await fetchAcceptedStudentsData();
+            }
             if (selectedApplication && selectedApplication.applicationId === applicationId) {
                 setSelectedApplication({ ...selectedApplication, status });
             }
@@ -96,7 +188,11 @@ const ManageApplications = () => {
                 applicationIds: selectedApplications,
                 status
             });
-            await fetchApplications();
+            await loadApplications();
+            // Refresh accepted students data for bulk accept operations
+            if (status === 'ACCEPTED') {
+                await fetchAcceptedStudentsData();
+            }
             setSelectedApplications([]);
         } catch (error) {
             console.error('Error updating bulk status:', error);
@@ -147,7 +243,15 @@ const ManageApplications = () => {
     };
 
     const getUniquePrograms = () => {
-        return [...new Set(applications.map(app => app.programName))];
+        // Filter out closed programs based on status and application end date
+        const availableApplications = applications.filter(app => {
+            const program = app.program;
+            const isClosedByStatus = program?.progStatus === 'CLOSED';
+            const isClosedByDate = program?.programApplicationEndDate && 
+                new Date(program.programApplicationEndDate) < new Date();
+            return !isClosedByStatus && !isClosedByDate;
+        });
+        return [...new Set(availableApplications.map(app => app.programName))];
     };
 
     const formatDate = (dateString) => {
@@ -195,6 +299,74 @@ const ManageApplications = () => {
         setPreviewDocumentData(null);
     };
 
+    // Exam Setup and Accepted Students Functions
+    const handleSetupExam = (programId, programName) => {
+        setSelectedProgramForExam({ id: programId, name: programName });
+        setShowExamSetupForm(true);
+    };
+
+    const handleExamSetupComplete = (setupData) => {
+        setShowExamSetupForm(false);
+        setSelectedProgramForExam(null);
+        // Refresh the accepted students data
+        fetchAcceptedStudentsData();
+        alert('Examination setup completed successfully!');
+    };
+
+    const handleShowAcceptedStudents = (programId, programName) => {
+        setSelectedProgramForExam({ id: programId, name: programName });
+        setShowAcceptedStudentsTable(true);
+    };
+
+    const handleCloseAcceptedStudents = () => {
+        setShowAcceptedStudentsTable(false);
+        setSelectedProgramForExam(null);
+        // Refresh data after potential admit card generation
+        fetchAcceptedStudentsData();
+    };
+
+    // Bulk Send Admit Cards Function
+    const handleBulkSendAdmitCards = async (programId, programName) => {
+        const confirmSend = window.confirm(
+            `Are you sure you want to generate and send admit cards to all accepted students for "${programName}"?\n\nThis will send admit cards to all students who haven't received them yet.`
+        );
+        
+        if (!confirmSend) return;
+
+        try {
+            setIsDetailLoading(true);
+            const response = await api.post(`/exam/generate-admit-cards/${programId}`);
+            
+            if (response.data) {
+                const { successCount, failureCount, totalStudents } = response.data;
+                let message = `Admit card generation completed!\n\n`;
+                message += `Total Students: ${totalStudents}\n`;
+                message += `Successfully Sent: ${successCount}\n`;
+                if (failureCount > 0) {
+                    message += `Failed: ${failureCount}\n`;
+                }
+                
+                alert(message);
+                
+                // Refresh accepted students data
+                await fetchAcceptedStudentsData();
+            }
+        } catch (error) {
+            console.error('Error bulk sending admit cards:', error);
+            alert('Failed to send admit cards. Please try again.\n\nError: ' + (error.response?.data || error.message));
+        } finally {
+            setIsDetailLoading(false);
+        }
+    };
+
+    const getAcceptedStudentsCount = (programId) => {
+        return acceptedStudentsData[programId]?.length || 0;
+    };
+
+    const getExamSetupStatus = (programId) => {
+        return examSetupData[programId] !== null;
+    };
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'PENDING': return '#f59e0b';
@@ -231,39 +403,53 @@ const ManageApplications = () => {
             </div>
 
             <Card className={styles.filtersCard}>
-                <div className={styles.filters}>
-                    <div className={styles.filterGroup}>
-                        <label>Status:</label>
-                        <select 
-                            value={filters.status} 
-                            onChange={(e) => setFilters({...filters, status: e.target.value})}
-                        >
-                            <option value="ALL">All Status</option>
-                            <option value="PENDING">Pending</option>
-                            <option value="ACCEPTED">Accepted</option>
-                            <option value="REJECTED">Rejected</option>
-                        </select>
+                <div className={styles.filtersHeader}>
+                    <div className={styles.filters}>
+                        <div className={styles.filterGroup}>
+                            <label>Status:</label>
+                            <select 
+                                value={filters.status} 
+                                onChange={(e) => setFilters({...filters, status: e.target.value})}
+                            >
+                                <option value="ALL">All Status</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="ACCEPTED">Accepted</option>
+                                <option value="REJECTED">Rejected</option>
+                            </select>
+                        </div>
+                        <div className={styles.filterGroup}>
+                            <label>Program:</label>
+                            <select 
+                                value={filters.program} 
+                                onChange={(e) => setFilters({...filters, program: e.target.value})}
+                            >
+                                <option value="ALL">All Programs</option>
+                                {getUniquePrograms().map(program => (
+                                    <option key={program} value={program}>{program}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className={styles.filterGroup}>
+                            <label>Search:</label>
+                            <input
+                                type="text"
+                                placeholder="Search by name, email, or program..."
+                                value={filters.search}
+                                onChange={(e) => setFilters({...filters, search: e.target.value})}
+                            />
+                        </div>
                     </div>
-                    <div className={styles.filterGroup}>
-                        <label>Program:</label>
-                        <select 
-                            value={filters.program} 
-                            onChange={(e) => setFilters({...filters, program: e.target.value})}
-                        >
-                            <option value="ALL">All Programs</option>
-                            {getUniquePrograms().map(program => (
-                                <option key={program} value={program}>{program}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className={styles.filterGroup}>
-                        <label>Search:</label>
-                        <input
-                            type="text"
-                            placeholder="Search by name, email, or program..."
-                            value={filters.search}
-                            onChange={(e) => setFilters({...filters, search: e.target.value})}
-                        />
+                    
+                    <div className={styles.toggleSection}>
+                        <label className={styles.toggleLabel}>
+                            <input
+                                type="checkbox"
+                                checked={showClosedInternships}
+                                onChange={(e) => setShowClosedInternships(e.target.checked)}
+                                className={styles.toggleCheckbox}
+                            />
+                            <span className={styles.toggleText}>Show Closed Internships</span>
+                        </label>
                     </div>
                 </div>
                 
@@ -380,6 +566,95 @@ const ManageApplications = () => {
                         {filteredApplications.length === 0 && (
                             <div className={styles.noData}>
                                 No applications found matching your criteria.
+                            </div>
+                        )}
+                    </div>
+                </Card>
+                
+                {/* Accepted Students Summary Section */}
+                <Card className={styles.acceptedStudentsCard}>
+                    <div className={styles.acceptedStudentsHeader}>
+                        <h3>Accepted Students by Program</h3>
+                        <p>Manage examination setup and admit card generation</p>
+                    </div>
+                            
+                    <div className={styles.programsList}>
+                        {getUniquePrograms().map(programName => {
+                            const programApplications = applications.filter(app => app.programName === programName);
+                            const programId = programApplications[0]?.program?.id || programApplications[0]?.programId;
+                            const acceptedCount = getAcceptedStudentsCount(programId);
+                            const examSetup = getExamSetupStatus(programId);
+                                    
+                            if (acceptedCount === 0) return null;
+                                    
+                            return (
+                                <div key={programName} className={styles.programCard}>
+                                    <div className={styles.programInfo}>
+                                        <div className={styles.programTitle}>
+                                            <h4>{programName}</h4>
+                                            <div className={styles.programStats}>
+                                                <span className={styles.acceptedCount}>
+                                                    {acceptedCount} Students Accepted
+                                                </span>
+                                                {examSetup ? (
+                                                    <span className={styles.examSetupBadge}>Exam Setup Complete</span>
+                                                ) : (
+                                                    <span className={styles.examPendingBadge}>Exam Setup Pending</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                                
+                                        <div className={styles.programActions}>
+                                            {!examSetup ? (
+                                                <Button
+                                                    onClick={() => handleSetupExam(programId, programName)}
+                                                    className={styles.setupExamButton}
+                                                    size="small"
+                                                >
+                                                    Setup Examination
+                                                </Button>
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        onClick={() => handleBulkSendAdmitCards(programId, programName)}
+                                                        className={styles.bulkSendButton}
+                                                        size="small"
+                                                        disabled={isDetailLoading}
+                                                    >
+                                                        {isDetailLoading ? 'Sending...' : 'Bulk Send Admit Cards'}
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => handleShowAcceptedStudents(programId, programName)}
+                                                        className={styles.manageStudentsButton}
+                                                        size="small"
+                                                    >
+                                                        Manage Students
+                                                    </Button>
+                                                </>
+                                            )}
+                                                    
+                                            <Button
+                                                onClick={() => handleShowAcceptedStudents(programId, programName)}
+                                                className={styles.viewStudentsButton}
+                                                size="small"
+                                                variant="secondary"
+                                            >
+                                                View Students
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                                
+                        {getUniquePrograms().every(programName => {
+                            const programApplications = applications.filter(app => app.programName === programName);
+                            const programId = programApplications[0]?.program?.id || programApplications[0]?.programId;
+                            return getAcceptedStudentsCount(programId) === 0;
+                        }) && (
+                            <div className={styles.noAcceptedStudents}>
+                                <p>No students have been accepted yet.</p>
+                                <p>Accept applications to see them here and manage admit cards.</p>
                             </div>
                         )}
                     </div>
@@ -558,6 +833,33 @@ const ManageApplications = () => {
                                                     </div>
                                                 )}
                                                 
+                                                {selectedApplication.documents.resume && (
+                                                    <div className={styles.documentItem}>
+                                                        <div className={styles.documentHeader}>
+                                                            <span className={styles.documentIcon}>📄</span>
+                                                            <div className={styles.documentInfo}>
+                                                                <span className={styles.documentName}>Resume/CV</span>
+                                                                <div className={styles.documentActions}>
+                                                                    <Button
+                                                                        onClick={() => previewDocument(selectedApplication.documents.resume, 'Resume/CV')}
+                                                                        className={styles.previewButton}
+                                                                        size="small"
+                                                                    >
+                                                                        Preview
+                                                                    </Button>
+                                                                    <Button
+                                                                        onClick={() => downloadDocument(selectedApplication.applicationId, 'resume')}
+                                                                        className={styles.downloadButton}
+                                                                        size="small"
+                                                                    >
+                                                                        Download
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
                                                 {selectedApplication.documents.coverLetter && (
                                                     <div className={styles.documentItem}>
                                                         <div className={styles.documentHeader}>
@@ -574,6 +876,60 @@ const ManageApplications = () => {
                                                                     </Button>
                                                                     <Button
                                                                         onClick={() => downloadDocument(selectedApplication.applicationId, 'coverletter')}
+                                                                        className={styles.downloadButton}
+                                                                        size="small"
+                                                                    >
+                                                                        Download
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                {selectedApplication.documents.passportPhoto && (
+                                                    <div className={styles.documentItem}>
+                                                        <div className={styles.documentHeader}>
+                                                            <span className={styles.documentIcon}>📷</span>
+                                                            <div className={styles.documentInfo}>
+                                                                <span className={styles.documentName}>Passport Photo</span>
+                                                                <div className={styles.documentActions}>
+                                                                    <Button
+                                                                        onClick={() => previewDocument(selectedApplication.documents.passportPhoto, 'Passport Photo')}
+                                                                        className={styles.previewButton}
+                                                                        size="small"
+                                                                    >
+                                                                        Preview
+                                                                    </Button>
+                                                                    <Button
+                                                                        onClick={() => downloadDocument(selectedApplication.applicationId, 'passportphoto')}
+                                                                        className={styles.downloadButton}
+                                                                        size="small"
+                                                                    >
+                                                                        Download
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                {selectedApplication.documents.signature && (
+                                                    <div className={styles.documentItem}>
+                                                        <div className={styles.documentHeader}>
+                                                            <span className={styles.documentIcon}>✍️</span>
+                                                            <div className={styles.documentInfo}>
+                                                                <span className={styles.documentName}>Digital Signature</span>
+                                                                <div className={styles.documentActions}>
+                                                                    <Button
+                                                                        onClick={() => previewDocument(selectedApplication.documents.signature, 'Digital Signature')}
+                                                                        className={styles.previewButton}
+                                                                        size="small"
+                                                                    >
+                                                                        Preview
+                                                                    </Button>
+                                                                    <Button
+                                                                        onClick={() => downloadDocument(selectedApplication.applicationId, 'signature')}
                                                                         className={styles.downloadButton}
                                                                         size="small"
                                                                     >
@@ -775,6 +1131,29 @@ const ManageApplications = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Exam Setup Form Modal */}
+            {showExamSetupForm && selectedProgramForExam && (
+                <ExamSetupForm
+                    programId={selectedProgramForExam.id}
+                    programName={selectedProgramForExam.name}
+                    onSetupComplete={handleExamSetupComplete}
+                    onCancel={() => {
+                        setShowExamSetupForm(false);
+                        setSelectedProgramForExam(null);
+                    }}
+                />
+            )}
+
+            {/* Accepted Students Table Modal */}
+            {showAcceptedStudentsTable && selectedProgramForExam && (
+                <AcceptedStudentsTable
+                    programId={selectedProgramForExam.id}
+                    programName={selectedProgramForExam.name}
+                    examSetup={examSetupData[selectedProgramForExam.id]}
+                    onClose={handleCloseAcceptedStudents}
+                />
             )}
         </div>
     );
