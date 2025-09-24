@@ -79,6 +79,10 @@ public class SecurityConfig {
                         
                         // Allow test upload endpoint (remove in production)
                         .requestMatchers("/api/applications/test-upload").permitAll()
+                        
+                        // Temporarily allow my-applications for testing (remove in production)
+                        .requestMatchers("/api/applications/test").permitAll()
+                        .requestMatchers("/api/applications/my-applications").permitAll()
 
                         // --- ADD THIS LINE ---
                         // Allow UptimeRobot to make HEAD requests to keep the server alive
